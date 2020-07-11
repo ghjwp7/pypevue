@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 '''__init__.py -- Purposes of this file include: (1) Existence of
    __init__.py makes this directory represent a module.  (2) Via
    sys.path.insert(), it adds this directory to python's import search
@@ -10,10 +11,22 @@
    how `tell` functions work.
 
 '''
+# This section (next 8 lines) is for PyScaffold
+from pkg_resources import get_distribution, DistributionNotFound
+try:
+    dist_name = 'pypevue'
+    __version__ = get_distribution(dist_name).version
+except DistributionNotFound:
+    __version__ = 'unknown'
+finally:
+    del get_distribution, DistributionNotFound
 
-import os.path, sys
+
+#probably delete this section
+#import os.path, sys
 #print ('\nStarting  pypevue.__init__.py')
 #sys.path.insert(1, os.path.abspath(os.path.join('..', 'pypevue')))
+
 
 class FunctionList:
     # The next lines initialize dicts for correspondences between
