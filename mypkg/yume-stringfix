@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# yume-stringfix makes a menu with choices to (1) find all the files a
+# given string is in, and (2) change a given string in a file to some
+# other string
+
+yume -at 480x235-4+1266\
+ -bu  -ex  -la 'Edit menu' "x2 $0"  -la 'Reload menu' "%+$0"\
+ -bu  -la 'Glob pattern for files:' -la FILEGLOB -iv '*' \
+ -bu  -la 'Strings and search are case sensitive'\
+ -bu  -la 'echo; grep -s "$STR2FIND" $FILEGLOB;echo' -la 'grep this Target in files:' -la STR2FIND -iv 'pypeVue' \
+ -bu  -la 'grep -l for Target' 'echo;grep -ls "$STR2FIND" $FILEGLOB;echo'\
+      -la 'grep -l for Repl. ' 'echo;grep -ls "$NEWSTR"   $FILEGLOB;echo'\
+ -bu  -la 'echo;echo Target = $STR2FIND, Repl. = $NEWSTR; echo' -la 'Replacement string:' -la NEWSTR -iv 'pypevu' \
+ -bu  -la 'echo; ls -l *$FILE2DO; sed -e "s/$STR2FIND/$NEWSTR/g" $FILE2DO > t1-$FILE2DO && mv $FILE2DO t2-$FILE2DO; mv t1-$FILE2DO $FILE2DO;echo; ls -l *$FILE2DO; echo' -la 'Replace Target in file:' -la FILE2DO -iv 'none' \
+ -bu  -la 'grep in files for Replacement string' 'echo; grep -s "$NEWSTR" $FILEGLOB;echo'
+
+# -bu  -la 'echo; ls -l $FILE2DO; echo sed -e "s/$STR2FIND/$NEWSTR/g" $FILE2DO ">" t-$FILE2DO "&&" mv t-$FILE2DO $FILE2DO;echo; ls -l $FILE2DO; echo' -la 'Replace Target in file:' -la FILE2DO -iv 'none' \

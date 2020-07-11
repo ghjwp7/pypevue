@@ -1,0 +1,13 @@
+=P  dRatio=1.1     endGap=0 postHi=.4
+=P  postDiam=.08   pDiam=.1  qDiam=.1
+=P  postLabel=Rtc  userPar0=0.01
+=P  Plugins=examples.twoRingsHelper
+
+=L
+B-1,0,0; P7,1,25.7142857;
+B+1,0,0; P5,1,0;
+
+=C
+Gpae 0,1;;;;;;0;
+BPea 0,1;;;;;;0;
+Raaq7,8;rb;sYc;td;ue7;vCe8;w;;
