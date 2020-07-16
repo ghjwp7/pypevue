@@ -176,8 +176,10 @@ class IcosaGeoPoint(Point):
             angle -= 2*pi
         if show: print(f'  returning angle {degrees(angle):1.2f}deg')
         return angle
-    def __str__(self):
+    def __repr__(self):
         return f'num {self.num}, rank {self.rank}, face {self.face}, step {self.step}, nnbrs {self.nnbrs}, dupl {self.dupl}, coords ({self.x:1.2f}, {self.y:1.2f}, {self.z:1.2f})'
+    def __str__(self):
+        return f'{self.num}, {self.rank}, {self.face}, {self.step}, {self.nnbrs}, {self.dupl}, {self.x:1.2f}, {self.y:1.2f}, {self.z:1.2f}'
 
 def genTriangleK (layout, K, v0, v1, v2, pn):
     def genPoint(p, q, r):
