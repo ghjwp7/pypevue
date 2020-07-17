@@ -1,0 +1,52 @@
+// File pypevu.scad, generated  2020-07-17  13:54:42
+// by pypevu.py from script "../src/pypevue/examples/eg-fatpost-redstar"
+$fn = 30;
+userPar0 = "";
+userPar1 = "";
+userPar2 = "";
+//include <>
+
+module onePost (diam, hi, yA, zA, px, py, pz)
+  translate (v=[px, py, pz]) rotate(a=[0, yA, zA])
+      cylinder(d=diam, h=hi);
+module makePosts() {
+  onePost(30.0, 200.0,   0.000,   0.000,   0.00, 0.00, 0.00 );
+  onePost(30.0, 200.0,   0.000,   0.000,   100.00, 0.00, 0.00 );
+  onePost(30.0, 200.0,   0.000, -104.040,   30.90, 95.11, 0.00 );
+  onePost(30.0, 200.0,   0.000, -90.000,   -80.90, 58.78, 0.00 );
+  onePost(30.0, 200.0,   0.000, -26.570,   -80.90, -58.78, 0.00 );
+  onePost(30.0, 200.0,   0.000, 180.000,   30.90, -95.11, 0.00 );
+}
+module oneLabel (offset, yA, txt, lx, ly, lz) 
+  translate (v=[lx+offset, ly+offset, lz+offset])
+    rotate([0, yA, 0]) color(c="Blue") text(size=4.710, text=txt);
+module makeLabels() {
+  oneLabel(10.000, 0.000, "0",  0.0, 0.0, 200.0);
+  oneLabel(10.000, 0.000, "1",  100.0, 0.0, 200.0);
+  oneLabel(10.000, 0.000, "2",  30.9, 95.11, 200.0);
+  oneLabel(10.000, 0.000, "3",  -80.9, 58.78, 200.0);
+  oneLabel(10.000, 0.000, "4",  -80.9, -58.78, 200.0);
+  oneLabel(10.000, 0.000, "5",  30.9, -95.11, 200.0);
+}
+module oneCyl(diam, cylLen, rota, trans, colo)
+    translate (v=trans) rotate(a=rota)
+      color(c=colo) cylinder(d=diam, h=cylLen);
+module makeCylinders() {
+  oneCyl (17.000, 621.990, [0, 30.450, 126.000], [158.082, -79.945, -168.111], "Green");
+  oneCyl (17.000, 621.990, [0, 30.450, -162.000], [124.874, 125.647, -168.111], "Green");
+  oneCyl (17.000, 621.990, [0, 30.450, -90.000], [-80.900, 157.595, -168.111], "Green");
+  oneCyl (17.000, 621.990, [0, 30.450, -18.000], [-174.874, -28.243, -168.111], "Green");
+  oneCyl (17.000, 621.990, [0, 30.450, 54.000], [-27.182, -175.055, -168.111], "Green");
+  oneCyl (17.000, 507.560, [0, 90.000, 126.000], [214.618, -157.762, 100.000], "Red");
+  oneCyl (17.000, 507.550, [0, 90.000, -162.000], [216.362, 155.377, 100.000], "Red");
+  oneCyl (17.000, 507.560, [0, 90.000, -90.000], [-80.900, 253.780, 100.000], "Red");
+  oneCyl (17.000, 507.550, [0, 90.000, -18.000], [-266.362, 1.487, 100.000], "Red");
+  oneCyl (17.000, 507.560, [0, 90.000, 54.000], [-83.718, -252.872, 100.000], "Red");
+  oneCyl (17.000, 300.000, [0, 0.000, 0.000], [0.000, 0.000, -50.000], [.5,0,.5]);
+}
+
+union() {
+  makePosts();
+  makeLabels();
+  makeCylinders();
+}

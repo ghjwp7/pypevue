@@ -369,8 +369,9 @@ module onePost (diam, hi, yA, zA, px, py, pz)
       cylinder(d=diam, h=hi);
 module makePosts() {
 ''')
+    # The onePost calls in following should match params in above def.
     for p in ref.LO.posts:
-        fout.write(f'''  onePost({p.diam}, {p.hite}, {p.yAngle:7.3f}, {p.zAngle:7.3f},   {p.foot});
+        fout.write(f'''  onePost({p.diam}, {p.hite}, {p.yAngle:7.3f}, {p.zAngle:7.3f},   {p.foot.x:1.2f}, {p.foot.y:1.2f}, {p.foot.z:1.2f} );
 ''')
     fout.write('}\n')           # close the module
 

@@ -1,0 +1,134 @@
+// File pypevu.scad, generated  2020-07-17  13:54:45
+// by pypevu.py from script "../src/pypevue/examples/eg-two-rings"
+$fn = 30;
+userPar0 = 0.01;
+userPar1 = "";
+userPar2 = "";
+//include <>
+
+// Make a three-color post with specified colors
+module flagPost (diam, high, co1, co2, co3) {
+  eps=0.05;  h3=high/3;
+  color(co1) cylinder(d=diam-eps, h=3*h3);
+  color(co2) cylinder(d=diam,     h=2*h3);
+  color(co3) cylinder(d=diam+eps, h=1*h3);
+}
+
+module canePost (diam, high, twirl, co1, co2) {
+  eps=0.05;  sides=8*ceil(diam)+3;
+  color(co1)
+    linear_extrude(height=high, twist=twirl, $fn=sides)
+      difference() {
+        circle(d=diam, $fn=sides);
+        square([diam/2,diam*2], center=true);
+      }
+  color(co2) cylinder(d=diam-eps, h=high+eps, $fn=sides);
+}
+
+// Decorate posts according to post number
+module decoratedPost(num, diam, high) {
+  if   (num<2) color("Red") {
+                  cylinder(d1=0, d2=diam*2, h=high*1.1, $fn=5);
+                  cylinder(d2=0, d1=diam*2, h=high*1.1, $fn=5);
+               }
+  else if (num<4) color("Magenta") cylinder(d=diam, h=high, $fn=4);
+  else if (num<6) flagPost(diam, high, "Green", "Cyan", "Blue"); 
+  else if (num<9) flagPost(diam, high, "Red", "White", "Green");
+  else            canePost(diam, high, 300, "Red", "White");
+}
+
+module onePost (postNum, postDiam, postHi, yAngle, zAngle, px, py, pz) {
+  translate (v=[px, py, pz]) {
+    rotate(a=[0, yAngle, zAngle]) {
+      decoratedPost(postNum, postDiam, postHi);
+    }
+  }
+}
+
+module makePosts() {
+  onePost(0, 8.0, 40.0,   0.000,   0.000,   -9.903, 43.388, 0.0);
+  onePost(1, 8.0, 40.0,   0.000,   0.000,   -77.748, 97.493, 0.0);
+  onePost(2, 8.0, 40.0,   0.000,   0.000,   -162.349, 78.183, 0.0);
+  onePost(3, 8.0, 40.0,   0.000,   0.000,   -200.0, 0.0, 0.0);
+  onePost(4, 8.0, 40.0,   0.000,  90.000,   -162.349, -78.183, 0.0);
+  onePost(5, 8.0, 40.0,   0.000,  90.000,   -77.748, -97.493, 0.0);
+  onePost(6, 8.0, 40.0,   0.000,  90.000,   -9.903, -43.388, 0.0);
+  onePost(7, 8.0, 40.0,   0.000, 180.000,   200.0, 0.0, 0.0);
+  onePost(8, 8.0, 40.0,   0.000, -90.000,   130.902, 95.106, 0.0);
+  onePost(9, 8.0, 40.0,   0.000,   0.000,   19.098, 58.779, 0.0);
+  onePost(10, 8.0, 40.0,   0.000,  90.000,   19.098, -58.779, 0.0);
+  onePost(11, 8.0, 40.0,   0.000,   0.000,   130.902, -95.106, 0.0);
+}
+module oneLabel (offset, yA, txt, lx, ly, lz) 
+  translate (v=[lx+offset, ly+offset, lz+offset])
+    rotate([0, yA, 0]) color(c="Red") text(size=13.310, text=txt);
+module makeLabels() {
+  oneLabel(2.667, 0.000, "0",  -9.9, 43.39, 20.0);
+  oneLabel(2.667, 0.000, "1",  -77.75, 97.49, 20.0);
+  oneLabel(2.667, 0.000, "2",  -162.35, 78.18, 20.0);
+  oneLabel(2.667, 0.000, "3",  -200.0, 0.0, 20.0);
+  oneLabel(2.667, 0.000, "4",  -162.35, -78.18, 20.0);
+  oneLabel(2.667, 0.000, "5",  -77.75, -97.49, 20.0);
+  oneLabel(2.667, 0.000, "6",  -9.9, -43.39, 20.0);
+  oneLabel(2.667, 0.000, "7",  200.0, 0.0, 20.0);
+  oneLabel(2.667, 0.000, "8",  130.9, 95.11, 20.0);
+  oneLabel(2.667, 0.000, "9",  19.1, 58.78, 20.0);
+  oneLabel(2.667, 0.000, "10",  19.1, -58.78, 20.0);
+  oneLabel(2.667, 0.000, "11",  130.9, -95.11, 20.0);
+}
+
+function hash3(x) =
+  let (a = (x+PI-3)*PI+userPar0, b=a*PI, c=b*PI)
+  [a-floor(a), b-floor(b), c-floor(c)];
+
+module roundEnds (cylDiam, cylLen, trans, rota) {
+  translate(trans)
+    rotate(rota) {
+      cylinder(d=cylDiam, h=cylLen);
+      sphere(d=cylDiam);
+      translate ([0,0,cylLen]) sphere(d=cylDiam);
+    }
+}
+
+// Add a ball at each end of pipe, and color some pipes per angles
+module oneCyl (p1, p2, cylDiam, cylLen, yAngle, zAngle,
+               cx, cy, cz, cColor="Blue") {
+  if (p1==10)
+    translate([cx, cy, cz])
+      rotate([0, yAngle, zAngle])
+        canePost (cylDiam, cylLen, 700, cColor, "Red");
+  else
+      color(c = hash3(yAngle-zAngle))
+      roundEnds (cylDiam, cylLen, [cx, cy, cz], [0, yAngle, zAngle]);
+}
+
+module makeCylinders() {
+    oneCyl(0, 1, 10.0, 95.55, 65.25, 141.43, -9.9, 43.39, 0.0, "Green");
+    oneCyl(1, 2, 10.0, 95.55, 65.25, -167.14, -77.75, 97.49, 0.0, "Green");
+    oneCyl(2, 3, 10.0, 95.55, 65.25, -115.71, -162.35, 78.18, 0.0, "Green");
+    oneCyl(3, 4, 10.0, 95.55, 65.25, -64.29, -200.0, 0.0, 0.0, "Green");
+    oneCyl(4, 5, 10.0, 95.55, 65.25, -12.86, -162.35, -78.18, 0.0, "Green");
+    oneCyl(5, 6, 10.0, 95.55, 65.25, 38.57, -77.75, -97.49, 0.0, "Green");
+    oneCyl(6, 0, 10.0, 95.56, 65.25, 90.0, -9.9, -43.39, 0.0, "Green");
+    oneCyl(0, 1, 10.0, 95.55, 114.75, 141.43, -9.9, 43.39, 40.0, [.5,0,.5]);
+    oneCyl(1, 2, 10.0, 95.55, 114.75, -167.14, -77.75, 97.49, 40.0, [.5,0,.5]);
+    oneCyl(2, 3, 10.0, 95.55, 114.75, -115.71, -162.35, 78.18, 40.0, [.5,0,.5]);
+    oneCyl(3, 4, 10.0, 95.55, 114.75, -64.29, -200.0, 0.0, 40.0, [.5,0,.5]);
+    oneCyl(4, 5, 10.0, 95.55, 114.75, -12.86, -162.35, -78.18, 40.0, [.5,0,.5]);
+    oneCyl(5, 6, 10.0, 95.55, 114.75, 38.57, -77.75, -97.49, 40.0, [.5,0,.5]);
+    oneCyl(6, 0, 10.0, 95.56, 114.75, 90.0, -9.9, -43.39, 40.0, [.5,0,.5]);
+    oneCyl(7, 8, 10.0, 117.56, 90.0, 126.0, 200.0, 0.0, 0.0, "Red");
+    oneCyl(8, 9, 11.0, 117.98, 85.14, -162.0, 130.9, 95.11, 0.0, "Red");
+    oneCyl(9, 10, 12.1, 117.98, 85.14, -90.0, 19.1, 58.78, 10.0, "Yellow");
+    oneCyl(10, 11, 13.31, 117.98, 85.14, -18.0, 19.1, -58.78, 20.0, "Yellow");
+    oneCyl(11, 7, 14.64, 117.99, 85.14, 54.0, 130.9, -95.11, 30.0, "Yellow");
+    oneCyl(7, 8, 16.11, 117.56, 90.0, 126.0, 200.0, 0.0, 40.0, "Cyan");
+    oneCyl(8, 9, 17.72, 117.55, 90.0, -162.0, 130.9, 95.11, 40.0, "Cyan");
+    oneCyl(9, 10, 17.72, 117.56, 90.0, -90.0, 19.1, 58.78, 40.0, "Cyan");
+}
+
+union() {
+  makePosts();
+  makeLabels();
+  makeCylinders();
+}

@@ -12,6 +12,7 @@ import xml.etree.ElementTree as ET
 import time
 import inspect
 from base_test import BaseTest
+from re import search
 
 class SystemTest(BaseTest):
     '''to run:
@@ -29,18 +30,18 @@ class SystemTest(BaseTest):
     runTestCounts = [2]
     testPath = os.path.dirname(__file__)
     pypePath = os.path.normpath(f'{testPath}/../src/pypevue')
-    scadPath = os.path.normpath(f'./tmp_output_files')
+    scadPath = os.path.normpath(f'{testPath}/tmp_output_files')
     examplesPath = os.path.normpath(f'{testPath}/../src/pypevue/examples')
 
     def test_00_instantiate(self):
-        print(f'\nSystemTest:   To view 3D results say "openscad pypeVue.scad&"\nin pypevue project directory\n') 
+        print(f'\nSystemTest:   To view 3D results, in  tmp_output_files/  say "openscad fn&"\nwhere fn is a file in that directory.\n') 
         if self.skipThisTest(inspect.stack()[0][3]): return
         print ()
-        scadf = os.path.normpath(f'{scadPath}/to-instance')
-        err = os.system(f'{pypePath}/pypevu.py scadFile={scadf}')
+        scadf = os.path.normpath(f'{self.scadPath}/to-instance')
+        err = os.system(f'{self.pypePath}/pypevu.py; mv pypevu.scad {scadf}')
         self.assertEqual(0, err)
 
-    def test_01_freq_1(self):
+    def doRegexGroup(self, rex):        
         if self.skipThisTest(inspect.stack()[0][3]): return
         print ()
         # Get list of eg-* files in  ../src/pypevue/examples/
@@ -49,24 +50,36 @@ class SystemTest(BaseTest):
         gmls = os.listdir(self.testPath)
         gmgm = [f for f in gmls if f.startswith('gm-eg-')]
         for fname in egeg:
+            if not search(rex, fname):
+                continue        # Skip if name doesn't match regex
             # If we have a golden master for the example, then test it,
             # else say that example doesn't have a golden master
             if f'gm-{fname}' not in gmgm:
-                print (f"sad, can't test {fname} due to non-golden")
+                print (f"\nNot running {fname} due to non-golden.")
             else:
-                print (f'A++, would test {fname}')
+                print (f'\nTest example {fname}')
                 # We have a golden master so run a test
                 scriptPath = os.path.normpath(f'{self.examplesPath}/{fname}')
-                scadf = os.path.normpath(f'{scadPath}/to-{fname}')
+                scadf = os.path.normpath(f'{self.scadPath}/to-{fname}')
                 # Run the example and see if pypevue exits ok
-                err = os.system(f'{pypePath}/pypevu.py f={scriptPath} scadFile={scadPath}')
+                err = os.system(f'{self.pypePath}/pypevu.py f={scriptPath}; mv pypevu.scad {scadf}')
                 self.assertEqual(0, err)
-                # Compare 
+                # Compare output file to golden file
+                with open(f'{self.testPath}/gm-{fname}') as fg:
+                    with open(scadf) as ft:
+                        # Read and discard first two lines of each file
+                        for ff in (fg, fg, ft, ft):  dc = ff.readline()
+                        # Compare rest of files line-by-line
+                        for gline in fg:                            
+                            tline = ft.readline()
+                            self.assertEqual(tline, gline)
 
-    def test_99_run_all_on(self):
-        testName = inspect.stack()[0][3]
-        print(f'\n  {testName}' + ' ' * (77 - len(testName)), end='')
-        self.assertTrue(self.runAll)
 
+    def test_aap(self):     self.doRegexGroup('arith|auto|pentagon')
+    def test_fts(self):     self.doRegexGroup('fat|two|several')
+    def test_cap(self):     self.doRegexGroup('cap')
+    def test_freq(self):    self.doRegexGroup('freq')
+    def test_geo(self):     self.doRegexGroup('geo')
+         
 if __name__ == '__main__':
     unittest.main()
