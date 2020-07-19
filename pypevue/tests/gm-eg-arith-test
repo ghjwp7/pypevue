@@ -1,4 +1,4 @@
-// File pypevu.scad, generated  2020-07-17  13:54:41
+// File pypevu.scad, generated  2020-07-17  18:53:32
 // by pypevu.py from script "../src/pypevue/examples/eg-arith-test"
 $fn = 30;
 userPar0 = "";

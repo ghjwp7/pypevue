@@ -177,10 +177,11 @@ def setupData(c):
     for k in range(1,len(argv)):
         c.paramTxt = c.paramTxt + ' ' + argv[k]
     c.userLocals = {}               # Initialize empty user-space dict
-    import os.path
-    myname = os.path.splitext(os.path.basename(__file__))[0]
+    #import os.path
+    #myname = os.path.splitext(os.path.basename(__file__))[0]
     # Add classes Point, Post, Layout, FunctionList to userLocals, and ref.
-    exec(f'from {myname} import Point,Post,Layout\nfrom pypevue import FunctionList\nref=FunctionList', c.userLocals)
+    #exec(f'from {myname} import Point,Post,Layout\nfrom pypevue import FunctionList\nref=FunctionList', c.userLocals)
+    exec(f'from pypevue.pypevu import Point,Post,Layout\nfrom pypevue import FunctionList\nref=FunctionList', c.userLocals)
 #---------------------------------------------------------
 def makePluginsList(ref):
     pll = ''
@@ -190,8 +191,10 @@ def makePluginsList(ref):
                 pll = pll + ',' + s[8:]  # add its list to the plugins list.
     return pll
 #---------------------------------------------------------
+def run():
+    main(argv[1:])
 
-if __name__ == '__main__':
+def main(args):
     t0 = time.time()
     FunctionList.registrar('')
     ref = FunctionList
@@ -218,3 +221,6 @@ if __name__ == '__main__':
         fout.write(ref.backCode)
     t1 = time.time()-t0
     print (f'For script "{ref.f}", pypevu wrote code to {ref.scadFile} at {ref.date} in {t1:0.3f} seconds')
+
+if __name__ == '__main__':
+    run()
