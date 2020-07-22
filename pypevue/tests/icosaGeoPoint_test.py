@@ -38,7 +38,7 @@ class IcosaGeoPointTest(BaseTest):
         for (px,py,pz), (qx,qy,qz), expAngle in data:
             p = IcosaGeoPoint(px,py,pz, freq)
             q = IcosaGeoPoint(qx,qy,qz, freq)
-            actAngle = degrees(p.nutation(q))
+            actAngle = p.nutation(q)
             if show:
                 print(f'  exp: {expAngle}, act: {actAngle}', end=' ')
                 if expAngle - epsilon < actAngle < expAngle + epsilon:
@@ -89,7 +89,7 @@ class IcosaGeoPointTest(BaseTest):
         for (px,py,pz), (qx,qy,qz), expAngle in data:
             p = IcosaGeoPoint(px,py,pz, freq)
             q = IcosaGeoPoint(qx,qy,qz, freq)
-            actAngle = degrees(p.precession(q))
+            actAngle = p.precession(q)
             if show:
                 print(f'  exp: {expAngle}, act: {actAngle}', end=' ')
                 if expAngle == round(actAngle,2):

@@ -15,7 +15,7 @@
 from pypevue import FunctionList
 from pypevue.pypevu    import Point, Layout, ssq, sssq
 from pypevue.baseFuncs import addEdges
-from math import sqrt, pi, asin, sin, cos, atan2
+from math import sqrt, pi, asin, sin, cos, atan2, radians, acos, degrees
     
 Vfreq = 1     # Arbitrary initial value for global Vfreq
 
@@ -71,7 +71,7 @@ class IcosaGeoPoint(Point):
         # the vector corresponding to the slope from p to q
         m = Point(q.x-p.x, q.y-p.y, q.z-p.z)
         # find the angle between the line and the plane
-        angle = self.angle(pl, m)
+        angle = self._angleLineSlopeToPlane(pl, m)
 
         # determine if q is below or above the plane so we know the sign(+-) of the angle
         # https://math.stackexchange.com/questions/7931/point-below-a-plane
@@ -81,9 +81,9 @@ class IcosaGeoPoint(Point):
         plInnerQP = pl.inner(qpDiff)
         if plInnerQP < 0:
             angle = -angle
-        return angle
+        return degrees(angle)
 
-    def angle(self, plane, lineSlope):
+    def _angleLineSlopeToPlane(self, plane, lineSlope):
         '''
         return the angle (in radians) between a plane and a 3D line defined by it slope
         https://www.superprof.co.uk/resources/academic/maths/analytical-geometry/distance/angle-between-line-and-plane.html 
@@ -109,6 +109,32 @@ class IcosaGeoPoint(Point):
         if show: print(f'  returning angle {degrees(angle):1.2f}deg')
         return angle
 
+    def distanceToPlane(self, pl):
+        '''
+        return the shortest distance from myself to the plane pl
+        '''
+        pln = pl.norm()
+        plNorm = Point(pln[0], pln[1], pln[2])
+        return self.inner(plNorm)
+
+    def projectionOnPlane(self, pl):
+        '''
+        find the projection of this vector onto a plane
+        '''
+        pln = pl.norm()
+        plNorm = Point(pln[0], pln[1], pln[2])
+        pPerpMag = self.inner(plNorm)
+        plNorm.scale(pPerpMag)
+        pPerp = plNorm
+        return self.diff(pPerp)
+
+    def angle(self, q):
+        '''
+        angle between vector me and another vector q
+        '''
+        angleCos = self.inner(q) / (self.mag() * q.mag())
+        return degrees(acos(angleCos))
+
     def precession(self, q):
         '''
         Angle from the plane created by the tangent line to the circle on the sphere at height z and the origin, 
@@ -124,7 +150,7 @@ class IcosaGeoPoint(Point):
         plts = Point(2*p.x, 2*p.y, 2*p.z) # plane of tangent sphere
         pltsn = plts.norm()
         pltsNorm = Point(pltsn[0], pltsn[1], pltsn[2])
-        nut = self.nutation(q)
+        nut = radians(self.nutation(q))
 
         #find the component of q-p perpendicular to the tangent plane of the sphere at p
         qMp = q.diff(p)
@@ -138,8 +164,8 @@ class IcosaGeoPoint(Point):
         qProj = Point(aa[0], aa[1], aa[2])
         if show:
             aa = p.add(qMpMpqPerp)
-            qProj = Point(aa[0], aa[1], aa[2])
-            nutCheck = self.nutation(qProj)
+            qProj = Point(aa[0], aa[1], aa[2]) # PROBLEM!!!
+            nutCheck = radians(self.nutation(qProj))
             print(f'  plts ({plts}), pltsNorm ({pltsNorm}), nutation {degrees(nut):1.2f}deg, qMp ({qMp}), qMpMag {qMpMag:1.2f}, pltsMag = {pltsMag:1.2f}, pqPerp = ({pqPerp}), qMpMpqPerp = ({qMpMpqPerp}), qProj ({qProj}),  nutCheck {degrees(nutCheck):1.2f}deg (should be 0)')
 
         dx = 0.1
@@ -156,7 +182,7 @@ class IcosaGeoPoint(Point):
             pltc = Point(2*pl[0], 2*pl[1], 2*pl[2]) # plane of tangent to cicle
             if show: print(f'  tangent vector ({tv}), points on tangent line: p ({p}), t ({t}), pltc ({pltc})')
 
-        angle = self.angle(pltc, m)
+        angle = self._angleLineSlopeToPlane(pltc, m)
         aa = p.cross(pltc)
         pXpltc = Point(aa[0], aa[1], aa[2])
         if show: print(f'  raw angle {degrees(angle):1.2f}deg, pltc.inner(qProj) {pltc.inner(qProj)}, tv.inner(qProj) {tv.inner(qProj)}, pXpltc.inner(qProj) {pXpltc.inner(qProj)}')
@@ -175,7 +201,8 @@ class IcosaGeoPoint(Point):
         if angle >= 2*pi:
             angle -= 2*pi
         if show: print(f'  returning angle {degrees(angle):1.2f}deg')
-        return angle
+        return degrees(angle)
+
     def __repr__(self):
         return f'num {self.num}, rank {self.rank}, face {self.face}, step {self.step}, nnbrs {self.nnbrs}, dupl {self.dupl}, coords ({self.x:1.2f}, {self.y:1.2f}, {self.z:1.2f})'
     def __str__(self):
@@ -225,7 +252,7 @@ def FRA(p):    # Sort points by rank from 0 and clockwise about z
 # sortRZ -- Sort points by rank from 0 and clockwise about z always
 # starting a new rank on an icosahedron edge.  Note: this only works
 # with zAngle == 0, so should probably remove the rotation option
-def sortRZ(p):
+def sortRZ(p, Vfreq):
     angle = atan2(p.y,p.x) #angle from -pi to +pi (-180deg to 180deg)
     # our vertical edge 0 point is at 180 degrees.  If a rounding error occurs, this could
     # become -180 degrees.  Adjust the value to make sure this does not happen
@@ -247,7 +274,7 @@ def sortRZ(p):
     sortVal = p.rank - angle/8
     return sortVal
 
-def dedupClip(phase, layi, layo, clip1, clip2):
+def dedupClip(phase, layi, layo, clip1, clip2, Vfreq = 1):
     '''Given list of points via layi, return de-duplicated and clipped
     list etc'''
     L  = layi.posts
@@ -257,7 +284,7 @@ def dedupClip(phase, layi, layo, clip1, clip2):
     eps = 0.00001   # Good enough for freq 36, where .001 is too big
     pprev = Point(9e9, 8e8, 7e7)
     for n, p in enumerate(L): p.dex = n
-    L.sort(key = CCW if phase==1 else sortRZ)
+    L.sort(key = CCW if phase==1 else lambda p: sortRZ(p, Vfreq))
     transi = {} # Make node-number translation table for merged points
     if phase==1:
         for p in L:  p.dupl = 1 # how many duplicates of point
@@ -345,7 +372,7 @@ def genIcosahedron(layin, Vfreq, clip1, clip2, rotay, rotaz):
                 q.pa, q.pb, q.rank = p.num, p.num, 1+p.rank
             elif p.rank < q.rank: # Is p the new mom of q?
                 q.pb = p.num
-    dedupClip(2, laylo2, layin, clip1, clip2)
+    dedupClip(2, laylo2, layin, clip1, clip2, Vfreq)
 
     #add face, step, stepInRank
     po = layin.posts; rank = -1; stepsPerFace = [0,0];

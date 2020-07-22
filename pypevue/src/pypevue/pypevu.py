@@ -153,7 +153,7 @@ def isTrue(x):
     string beginning with f, F, N, or n.  Else, return True.    '''
     return not str(x)[:1] in 'fFNn'
 #---------------------------------------------------------
-def setupData(c):
+def setupData(c, readArgv = True):
     ref = FunctionList
     c.levels, c.thixx,  c.digits = 'abcde', 'pqrstuvw', '01234356789+-.'
     c.colorSet = {'G':'"Green"', 'Y':'"Yellow"', 'R':'"Red"', 'B':'"Blue"', 'C':'"Cyan"', 'M':'"Magenta"', 'W':'"White"', 'P':'[.5,0,.5]', 'A':'"Coral"'}
@@ -174,8 +174,9 @@ def setupData(c):
     c.traceExec=False
     c.geoColors = 'YBRC'          # Colors for pentagons, rings, rays, seams
     c.script1 = '=P postDiam=.1 endGap=.05','=C Gpae 1,2;;;;1;Rea 1,2;;;;1;','=L C 0,0,0; P5,1,0;'
-    for k in range(1,len(argv)):
-        c.paramTxt = c.paramTxt + ' ' + argv[k]
+    if readArgv:
+        for k in range(1,len(argv)):
+            c.paramTxt = c.paramTxt + ' ' + argv[k]
     c.userLocals = {}               # Initialize empty user-space dict
     #import os.path
     #myname = os.path.splitext(os.path.basename(__file__))[0]

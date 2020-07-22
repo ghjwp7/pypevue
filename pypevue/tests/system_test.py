@@ -31,6 +31,8 @@ class SystemTest(BaseTest):
     testPath = os.path.dirname(__file__)
     pypePath = os.path.normpath(f'{testPath}/../src/pypevue')
     scadPath = os.path.normpath(f'{testPath}/tmp_output_files')
+    if not os.path.exists(scadPath):
+        os.mkdir(scadPath)
     examplesPath = os.path.normpath(f'{testPath}/../src/pypevue/examples')
 
     def test_00_instantiate(self):
