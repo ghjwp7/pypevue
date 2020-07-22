@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-'''Adapted for pypevue 16 July 2020 by jiw from sn's version for
-pypevue.'''
+'''Adapted for pypevue 16 July 2020 by jiw from sn's geodome version.'''
 
 import unittest
 import shutil
@@ -24,7 +23,6 @@ class SystemTest(BaseTest):
 
     Each test should generate a scad file or files in
     tmp_output_files/, then continue to the next test
-
     '''
     runAll = True
     runTestCounts = [2]
@@ -33,7 +31,7 @@ class SystemTest(BaseTest):
     scadPath = os.path.normpath(f'{testPath}/tmp_output_files')
     examplesPath = os.path.normpath(f'{testPath}/../src/pypevue/examples')
 
-    def test_00_instantiate(self):
+    def test_instantiate(self):
         print(f'\nSystemTest:   To view 3D results, in  tmp_output_files/  say "openscad fn&"\nwhere fn is a file in that directory.\n') 
         if self.skipThisTest(inspect.stack()[0][3]): return
         print ()
