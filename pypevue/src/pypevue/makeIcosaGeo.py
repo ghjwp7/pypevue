@@ -132,7 +132,12 @@ class IcosaGeoPoint(Point):
         '''
         angle between vector me and another vector q
         '''
-        angleCos = self.inner(q) / (self.mag() * q.mag())
+        try:
+            angleCos = self.inner(q) / (self.mag() * q.mag())
+        except ZeroDivisionError as e:
+            angleCos = -1
+        angleCos = max(-1, angleCos)
+        angleCos = min(1, angleCos)
         return degrees(acos(angleCos))
 
     def precession(self, q):
