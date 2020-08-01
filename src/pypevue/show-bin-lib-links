@@ -4,8 +4,8 @@
 # directories; that is, in .local's site-packages directory or its bin
 # directory.  Also see: new-bin-lib-links
 
-LLIB=$(python3 -c "import sys; print ([x for x in sys.path if '/home/' in x][0])")
-LBIN=$HOME/.local/bin
+LLIB=$(python3 -m site --user-site)
+LBIN=$(python3 -m site --user-base)/bin
 date
 echo; echo "Program Links in $LBIN:"
 ls --color -l   $LBIN/pypevu*   $LBIN/geo*dome

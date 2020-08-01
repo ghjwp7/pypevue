@@ -11,8 +11,8 @@
 # program.  Make a fresh link for it (without .py suffix) among .local
 # python programs; for example, in $HOME/.local/bin/
 
-LLIB=$(python3 -c "import sys; print ([x for x in sys.path if '/home/' in x][0])")
-LBIN=$HOME/.local/bin
+LLIB=$(python3 -m site --user-site)
+LBIN=$(python3 -m site --user-base)/bin
 
 if [ "$1" ]; then
     PROG=${1}
