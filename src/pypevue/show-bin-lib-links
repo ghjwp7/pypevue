@@ -1,9 +1,17 @@
 #!/bin/sh
 
-# Called without an argument: Make fresh link in
+# Report pypevue and geodome links in local python lib or bin directories; that is, in .local's site-packages directory or its bin directory.  Also see:  new-bin-lib-links
+
+# Called with an argument: The argument should be the name of a python
+# program.  Make a fresh link for it (without .py suffix) among .local
+# python programs; for example, in $HOME/.local/bin/
 
 LLIB=$(python3 -c "import sys; print ([x for x in sys.path if '/home/' in x][0])")
 LBIN=$HOME/.local/bin
+date
+echo; echo "Program Links in $LBIN:"
+ls --color -l   $LBIN/pypevu*   $LBIN/geo*dome
 
-ls -al  $LBIN/pype*  $LBIN/geo*
-ls -al  $LLIB/pype*  $LLIB/geo*
+echo; echo "Module Links in $LLIB:"
+ls --color -dl  $LLIB/pypevue  $LLIB/geo*dome
+echo
