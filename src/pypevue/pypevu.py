@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
 # jiw 26 Dec 2018
-'''A program that generates OpenSCAD code for tubes along selected
-edges between `posts` in a plane.  This supports visualization of
-arrangements of edges in geodesic dome structures.'''
+'''pypevu -- a program in the pypevue module, that generates OpenSCAD
+code for tubes along selected edges between `posts` in a plane.  This
+supports visualization of arrangements of edges in geodesic dome
+structures, much like molecular stick-and-ball models, or like Tinker
+Toys® models.'''
 
 # This program processes a layout script and a cylinders script.  It
 # generates an output file containing OpenSCAD code for 3D structures
@@ -11,7 +13,8 @@ arrangements of edges in geodesic dome structures.'''
 # details.  Note, pypevu may import from pypevue, makeIcosaGeo, and
 # baseFuncs.  In a development environment, you may need to run the
 # command "python3 -m site --user-site" and create a pypevue link in
-# the directory it reports, eg ~/.local/lib/python3.6/site-packages .
+# the directory it reports, eg ~/.local/lib/python3.6/site-packages
+# (Also see bash scripts show-bin-lib-links and new-bin-lib-links).
 
 #  *******  pypevu basics:  *******
 #  A layout script tells where to locate posts.  It has entries with
