@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# Called without an argument: Make fresh link in
+
+LLIB=$(python3 -c "import sys; print ([x for x in sys.path if '/home/' in x][0])")
+LBIN=$HOME/.local/bin
+exit
+if [ "$1" ]; then
+    PROG=${1%.py}
+    echo Making link to $PROG in $LBIN
+    ln  -fs  $LBIN/$1  $PROG
+else
+    echo Making link to $PWD in $LLIB
+    ln  -fs  $PWD  $LLIB/.
+fi
