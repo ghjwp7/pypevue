@@ -1,18 +1,15 @@
-= Generates an octagon and a hexagon, and prints "p q r s t = 8 9 8 6 14" etc
-=A p=8; s=6
-=A ref.postDiam=0.3; print('postDiam set to', ref.postDiam, 'in =A')
-=L P#p,0.8,0;  #r  P#s,1.2,0;  #t
-=A q=p+1; print ('p q r s t =',p,q,r,s,t); ref.pDiam=0.1
-=C Gp0,1;;;;;;;0;
-=A print('postLabel is', ref.postLabel)
-=A print('len LO.posts is ', len(ref.LO.posts)); ref.pDiam=0.15
-=C Rp#p#q;;;;;#p;
-=A ref.pDiam=0.2; print('pDiam set to', ref.pDiam, 'in =A')
-=L P#t,1.5,0;
-=A print('len LO.posts is ', len(ref.LO.posts))
-=A ref.LO.posts.append(Post(Point(0,0,0), Point(.1,.1,.1), .05, .1, 45, 45))
-=A print('len LO.posts is ', len(ref.LO.posts))
-=A print('Last post is ', ref.LO.posts[-1])
-=C Ap#t;;;;;;;;;;;;;
-=A ref.pDiam=ref.postDiam; ref.postHi=ref.postDiam
-=C C27,28;
+= Generates spirally things via a user function -  jiw 1 Aug 2020
+=P Plugins=examples.userfuncs1  endGap=0  pDiam=0.1
+=P  postLabel=no  postHi=.03  postDiam=.1
+=xA t=ref.spirally(24); print ('ref.spirally(24) is', t)
+=L  B 0,0,0;    U spirally 9;
+=C  Gpcc 0,9;;;;;;;;;       Mpcc 0,1;;;;;;;;       9,10;;;;;;;;
+=L  B 1,1,1;  U spirally 22, 1.3, .14, .3, .3;
+=C  Rpcc 18,40;;;;;;;;;;;;;;;;;;;;;;
+=C  Ppcc 18,19;;;;;;;;;;;;;;;;;;;;;
+=C       40,41;;;;;;;;;;;;;;;;;;;;;
+=L  B 0,-1,1;  U spirally 30, 1.7, .12, .4, .7;
+=C  Ypcc 62,92;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+=C  Apcc 62,63;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+=C       92,93;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+=L  B 0,1,-1;    U spirally 400 3 .01 .5 .5;

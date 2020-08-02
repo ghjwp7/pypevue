@@ -8,9 +8,7 @@
    link to this dir (module) in ~/.local/lib/python3.6/site-packages/
    ***] (3) It creates the FunctionList class, with method `registrar`
    and with class variables that link to functions. (4) It describes
-   how `tell` functions work.
-
-'''
+   how `tell` functions work.'''
 # This section (next 8 lines) is for PyScaffold
 from pkg_resources import get_distribution, DistributionNotFound
 try:
@@ -20,13 +18,6 @@ except DistributionNotFound:
     __version__ = 'unknown'
 finally:
     del get_distribution, DistributionNotFound
-
-
-#probably delete this section
-#import os.path, sys
-#print ('\nStarting  pypevue.__init__.py')
-#sys.path.insert(1, os.path.abspath(os.path.join('..', 'pypevue')))
-
 
 class FunctionList:
     # The next lines initialize dicts for correspondences between
