@@ -82,6 +82,7 @@ class SystemTest(BaseTest):
     def test_cap(self):     self.doRegexGroup('cap')
     def test_freq(self):    self.doRegexGroup('freq')
     def test_geo(self):     self.doRegexGroup('geo')
+    def test_user(self):    self.doRegexGroup('user')
          
 if __name__ == '__main__':
     unittest.main()

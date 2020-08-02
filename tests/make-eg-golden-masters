@@ -1,13 +1,25 @@
 #!/bin/sh
 
-# Script to make "Golden Master" files for automatic-test comparisons
+# Script to make "Golden Master" files for automatic-test comparisons.  Parameter 1, if given, limits which files are processed.
 # - jiw - 17 July 2020
-echo $0 - 'Makes a gm-eg-* file for each eg-* file in examples/'
-
+echo $0 - 'Make gm-eg-* file(s) for eg-* file(s) in examples/'
 pvDir=../src/pypevue
 egDir=$pvDir/examples
 
-for fp in $egDir/eg-* ; do
+if [ "$1" ]; then
+    files=$egDir/$1
+    if [ -f $files ]; then
+        echo "Processing file $files"
+    else
+        echo "File $1 not found in $egDir, exiting"
+        exit
+    fi
+else
+    files="$egDir/eg-*"
+    echo "Processing all eg- files from $egDir"
+fi
+
+for fp in $files ; do
     f=${fp##.*/}
     echo Making gm-$f for $fp
     $pvDir/pypevu.py f=$fp
