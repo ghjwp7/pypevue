@@ -3,7 +3,7 @@
 # milieu, we override writeCylinders and writePosts instead of onePost
 # and oneCyl.  - jiw 27 Mar 2020
 
-from math import sqrt, pi, cos, sin, asin, atan2
+from math import sqrt, pi, cos, sin, asin, atan2, degrees
 from pypevu import ssq, sssq, rotate2, isTrue 
 from pypevu import Point, Post, Cylinder, Layout
 from pypevue import FunctionList as ref
@@ -130,8 +130,8 @@ module makeCylinders() {\n''')
         cylNum= 1000*p1 + p2
         if isTrue(listIt):
             print (f'Make {cyl}  L {L:2.2f}  {cName}')
-        yAngle = round((pi/2 - asin(dz/L)) * 180/pi, 2)
-        zAngle = round( atan2(dy, dx)      * 180/pi, 2)
+        yAngle = round(degrees(pi/2 - asin(dz/L)), 2)
+        zAngle = round(degrees(atan2(dy, dx)), 2)
         fout.write(f'    oneCyl({p1}, {p2}, {cyl.diam}, {round(L-2*gap,3)}, {yAngle}, {zAngle}, {cc}, {cName});\n')
 
     fout.write('}\n')           # close the module
