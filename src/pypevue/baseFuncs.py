@@ -6,7 +6,7 @@ structures. -- jiw March 2020...'''
 
 from sys import argv, exit, exc_info, stderr
 import datetime
-from math import sqrt, pi, cos, sin, asin, atan2
+from math import sqrt, cos, sin, asin, atan2, pi, radians, degrees
 from pypevue.pypevu import ssq, sssq, rotate2, isTrue
 from pypevue.pypevu import Point, Post, Cylinder, Layout
 from pypevue import FunctionList
@@ -206,7 +206,7 @@ def generatePosts(code, numberTexts, func):
         if nums:
             n, r, a0 = int(nums[0]), nums[1], nums[2]
             theta = 2*pi/n
-            x, y = rotate2(r, 0, a0*pi/180) # a0 in degrees
+            x, y = rotate2(r, 0, radians(a0)) # a0 in degrees
             for post in range(n):
                 postAt(bx+x, by+y, bz)
                 x, y = rotate2(x, y,theta)
@@ -342,8 +342,10 @@ def postTop(p, OP):   # Given post location p, return loc. of post top
     else:
         tx, ty, tz = x, y, z+u  # Fallback if p ~ OP
     siny = min(1, max(-1, (tz-z)/u)) # Don't let rounding error shut us down
-    yAxisAngle = (pi/2 - asin(siny)) * 180/pi
-    zAxisAngle =  atan2(ty-y, tx-x)  * 180/pi
+    yAxisAngle = degrees(pi/2 - asin(siny))
+    zAxisAngle = degrees(atan2(ty-y, tx-x))
+    #zt =  atan2(ty-y, tx-x) * 180/pi
+    #print (f'postTop  diff zangle: {zt-zAxisAngle:6.6e}   zt {zt}   zA {zAxisAngle}')
     return Point(tx,ty,tz), round(yAxisAngle,2), round(zAxisAngle,2)
 #===============================================
 def writePosts(fout):
@@ -435,8 +437,8 @@ module makeCylinders() {\n''')
         if isTrue(listIt):
             print (f'Make {cyl}  L {L:2.2f}  {cName}')
         # Use min/max to avoid exception from dz/L numerical error
-        yAngle = round((pi/2 - asin(min(1, max(-1, dz/L)))) * 180/pi, 2)
-        zAngle = round( atan2(dy, dx)      * 180/pi, 2)
+        yAngle = round(degrees(pi/2 - asin(min(1, max(-1, dz/L)))), 2)
+        zAngle = round(degrees(atan2(dy, dx)), 2)
         fout.write(f'''  oneCyl ({cyl.diam:0.3f}, {L-2*gap:0.3f}, [0, {yAngle:0.3f}, {zAngle:0.3f}], [{cc.x:0.3f}, {cc.y:0.3f}, {cc.z:0.3f}], {cName});\n''')
 
     if startFin & 2:
@@ -510,7 +512,7 @@ def setClipAndRota(c):
     phi = (1+sqrt(5))/2;   r = sqrt(2+phi)
     # Set default Z rotation to 0 instead of -18, so that FRA2 works
     # ok in makeIcosaGeo genIcosahedron()
-    c.LO.rotavec = Point(0, asin(phi/r)*180/pi, 0) # X,Y,Z rotations
+    c.LO.rotavec = Point(0, degrees(asin(phi/r)), 0) # X,Y,Z rotations
 #-------------------------------------------------------------
 def setCodeFrontAndBack(c):
     c.date = datetime.datetime.today().strftime('%Y-%m-%d  %H:%M:%S')

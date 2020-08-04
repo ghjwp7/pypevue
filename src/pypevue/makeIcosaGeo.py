@@ -16,8 +16,6 @@ from pypevue import FunctionList
 from pypevue.pypevu    import Point, Layout, ssq, sssq
 from pypevue.baseFuncs import addEdges
 from math import sqrt, pi, asin, sin, cos, atan2, radians, acos, degrees
-    
-Vfreq = 1     # Arbitrary initial value for global Vfreq
 
 class IcosaGeoPoint(Point):
     facess = [(1,2,3,4,5), (6,7,8,9,10,11,12,13,14,15), (16,17,18,19,20)]
@@ -249,14 +247,14 @@ def pointInBox (p, clip1, clip2):
     zlo, zhi = min(clip1.z, clip2.z), max(clip1.z, clip2.z)
     return xlo <= p.x <= xhi and ylo <= p.y <= yhi and zlo <= p.z <=zhi
 
-def CCW(p):    # Sort points by descending z and clockwise about z
+def CCW(p):    # To sort points by descending z and clockwise about z
     return -round(p.z*100000)-atan2(p.y,p.x)/8
-def FRA(p):    # Sort points by rank from 0 and clockwise about z
+def FRA(p):    # To sort points by rank from 0 and clockwise about z
     return p.rank - atan2(p.y,p.x)/8
 
-# sortRZ -- Sort points by rank from 0 and clockwise about z always
+# sortRZ -- To sort points by rank from 0 and clockwise about z always
 # starting a new rank on an icosahedron edge.  Note: this only works
-# with zAngle == 0, so should probably remove the rotation option
+# with zAngle == 0, so if you want this to work, don't rotate.
 def sortRZ(p, Vfreq):
     angle = atan2(p.y,p.x) #angle from -pi to +pi (-180deg to 180deg)
     # our vertical edge 0 point is at 180 degrees.  If a rounding error occurs, this could
@@ -276,7 +274,7 @@ def sortRZ(p, Vfreq):
         angle += (2*pi) / 10
     if angle > pi:
         angle -= 2*pi
-    sortVal = p.rank - angle/8
+    sortVal = p.rank - angle/8  # Divide angle by a number > 2*pi
     return sortVal
 
 def dedupClip(phase, layi, layo, clip1, clip2, Vfreq = 1):
@@ -334,7 +332,7 @@ def genIcosahedron(layin, Vfreq, clip1, clip2, rotay, rotaz):
     corners = [Point(corr1[i], corr1[j], corr1[k]) for i,j,k in cornerNote.split()]
     # Rotate corners by rz, ry degrees. See:
     # https://en.wikipedia.org/wiki/Rotation_matrix#General_rotations
-    DtoR = pi/180;   ry, rz = rotay*DtoR, rotaz*DtoR
+    ry, rz = radians(rotay), radians(rotaz)
     sa, ca, sb, cb = sin(rz), cos(rz), sin(ry), cos(ry)
     rox = Point(ca*cb,  -sa,  ca*sb)
     roy = Point(sa*cb,   ca,  sa*sb) # Set up x,y,z rows
@@ -416,55 +414,5 @@ def genIcosahedron(layin, Vfreq, clip1, clip2, rotay, rotaz):
             if step == stepsPerFace[idx]:
                 faceIdx += 1; step = 0
 
-
-if __name__ == '__main__':
-    # This is a test section for genIcosahedron
-    phi = (1+sqrt(5))/2;  r = sqrt(2+phi)
-    yAngle, zAngle = asin(phi/r)*180/pi, -9  # ~ 58.2825, ...
-    yAngle, zAngle = asin(phi/r)*180/pi, -18 # ~ 58.2825, -18
-    for Vfreq in (6,):
-        clipLo = Point(-2,-2,-2)
-        clipLo = Point(-2,-2,-0.65)
-        clipLo = Point(-2,-2,-0.01)
-        clipHi = Point(2,2,2)
-        print (f'=  Vfreq {Vfreq},   yAngle {yAngle},  zAngle {zAngle}')
-        print (f'=  Clip box corners = {clipLo} and {clipHi}')
-        LO = Layout(posts=[], cyls=[],  edgeList={}) # Init an empty layout
-        # At present, genIcosahedron reports about
-        # posts per face and about dedup/clip stats
-        genIcosahedron(LO, Vfreq, clipLo, clipHi, yAngle, zAngle)
-
-        print (f'=  Writing {len(LO.posts)} post coordinates')
-        print ('=P  endGap=0 postAxial=f postLabel=f  pDiam=.01  endGap=0  postHi=.02 postDiam=.01 ')
-        print ('=L O 0,0,0;')
-        np = 0
-        for p in LO.posts:
-            if np%3==0: print (' C', end='')
-            print (f' {p.x:0.5f},{p.y:0.5f},{p.z:0.5f} ', end='')
-            np += 1
-            if np%3==0: print (';')
-        if np%4 !=0: print (';')
-        lopo = LO.posts;  loel = LO.edgeList
-        print (";\n=A gg['endGap']=0")
-        # Generate sets of cylinders in various colors.
-        for co in ('Y', 'B', 'R', 'C'):
-            print (f'=C  {co}pff')
-            out = 0
-            for j in sorted(loel.keys()):
-                for k in sorted(loel[j]):
-                    if j<k:   # Both of j,k and k,j are in the list
-                        p, q = lopo[j], lopo[k]
-                        oB = p.rank == q.rank
-                        oY = p.nnbrs==5 or q.nnbrs==5
-                        #oC = p.pa==p.pb and q.pa==q.pb and not (oB or oY)
-                        oC = p.dupl>1 and q.dupl>1 and not (oB or oY)
-                        oR = not (oB or oY or oC)
-                        # Note, some spokes may satisfy multiple
-                        #   conditions.  In next line, one can attach
-                        #   'and not' clauses to suppress extra
-                        #   cylinders if desired.
-                        if (co=='B' and oB and not oY) or (co=='Y' and oY) or (co=='R' and oR) or (co=='C' and oC):
-                            print (f' {j:2} {k:2};', end='')
-                            out += 1
-                            if out%11 == 0: print()
-            print (f'\n=  Wrote {out} {co} cylinders')
+# 3 Aug 2020: jiw removed code from "if __name__ == '__main__'" to end
+# of file as no longer relevant

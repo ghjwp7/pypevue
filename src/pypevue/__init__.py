@@ -1,14 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-'''__init__.py -- Purposes of this file include: (1) Existence of
-   __init__.py makes this directory represent a module.  (2) Via
-   sys.path.insert(), it adds this directory to python's import search
-   list, so that other modules can import FunctionList without needing
-   the directory name. [***probably no longer relevant if we add a
-   link to this dir (module) in ~/.local/lib/python3.6/site-packages/
-   ***] (3) It creates the FunctionList class, with method `registrar`
-   and with class variables that link to functions. (4) It describes
-   how `tell` functions work.'''
+'''Besides making this directory represent a module, __init__ defines
+classes for plugins and for pypevue data structures:
+
+1,2.  Classes Point and IcosaGeoPoint are data structures for points
+in space.  Point has (x,y,z) data for one point, plus several methods
+that treat the coordinates as a point or a vector.  IcosaGeoPoint adds
+to that several data items useful when working with points on an
+icosahedron or a typical geodesic dome.
+
+3,4.  Classes Post and Cylinder are data structures for individual
+posts and cylinders, plus methods for access, string representations,
+etc
+
+5.  Class Layout is a data structure for assemblies of posts and
+cylinders, plus base points, origin points, and edge lists.
+
+6.  Class FunctionList, with its registrar() and clear() methods,
+supports plugins.  The tell() function at the end of this file is an
+example of a tell() method as needed in a plugin.  '''
+
 # This section (next 8 lines) is for PyScaffold
 from pkg_resources import get_distribution, DistributionNotFound
 try:
@@ -19,6 +30,22 @@ except DistributionNotFound:
 finally:
     del get_distribution, DistributionNotFound
 
+#==============================================
+
+
+#==============================================
+
+
+#==============================================
+
+
+#==============================================
+
+
+#==============================================
+
+
+#==============================================
 class FunctionList:
     # The next lines initialize dicts for correspondences between
     # functions and function names.
