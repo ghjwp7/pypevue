@@ -7,9 +7,8 @@ structures. -- jiw March 2020...'''
 from sys import argv, exit, exc_info, stderr
 import datetime
 from math import sqrt, cos, sin, asin, atan2, pi, radians, degrees
-from pypevue.pypevu import ssq, sssq, rotate2, isTrue
-from pypevue.pypevu import Point, Post, Cylinder, Layout
-from pypevue import FunctionList
+from pypevue import ssq, sssq, rotate2, isTrue
+from pypevue import Point, Post, Cylinder, Layout, FunctionList
 
 #---------------------------------------------------------
 def arithmetic(line, xTrace):

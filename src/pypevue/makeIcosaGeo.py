@@ -12,8 +12,7 @@
 #       ./makeIcosaGeo.py > t1-v; ./pypevu.py f=t1-v
 #         makeIcosaGeo > t1-v;  pypevu f=t1-v
 
-from pypevue import FunctionList
-from pypevue.pypevu    import Point, Layout, ssq, sssq
+from pypevue import  ssq, sssq, Point, Layout, FunctionList
 from pypevue.baseFuncs import addEdges
 from math import sqrt, pi, asin, sin, cos, atan2, radians, acos, degrees
 
