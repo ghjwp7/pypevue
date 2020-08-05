@@ -117,22 +117,21 @@ substitute for addEdge could import the base version of addEdge via
 "from pypevue.baseFuncs import addEdge as baseAddEdge" and could call
 it via "baseAddEdge(v,w, layout)" or similar.
 
-**User functions** have names not equal to any base function.  That
-is, a function defined in a plugins module and listed in a tell()
-statement is a user function if it isn't a base function.  You can
-call your function by a U code in a layout section.  For example, if
-"U mything 1,2,4;" appears in a layout section, pypevu will issue
-`mything(1.0, 2.0, 4.0)` at that point in its processing.  The
-function will be called with as many numerical parameters as the U
-code gives it. Note, mything() should be a defined and registered
-function; for example, if mything() is in myPI.py, use `=P
-Plugins=myPI` in script, and in myPI.py say `def mything(someargs)
-... def tell(): return (mything,)`
+**User functions** have names not equal to any base function name; a
+function is a user function if it isn't a base function.  Call user
+functions via U codes in layout sections.  For example, if "U mything
+1,2,4;" appears in a layout section, pypevu will issue `mything(1.0,
+2.0, 4.0)` at that point in its processing.  The function will be
+called with as many numerical parameters as the U code gives it. Note,
+`mything()` should be well-defined.  For example, if mything() code
+(like `def mything(someargs: ...`) is in myPI.py, use `=P
+Plugins=myPI` in your script, and in myPI.py also say `def tell():
+return (mything,)`.  Via proper imports, user functions can access
+pypevu data structures.  For examples see `examples/userfuncs1.py`.
 
 [ *In a future release, calls within arithmetic sections of a script
-will be supported in a simpler form (like `mything(paramlist)`), vs
-the present form (like `ref.uDict['mything'](paramlist)`)* ]
-
+will be supported in a simpler form, like `ref.mything(paramlist)`,
+vs the present form, like `ref.uDict['mything'](paramlist)`* ]
 
 
 Note
