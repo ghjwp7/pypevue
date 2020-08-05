@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# Set F=parameter.  If no parameter, set F=pypevu.dox.odt
+F=${1:-pypevu.dox.odt}
+libreoffice --headless --convert-to pdf $F  2>/dev/null
+
+# Set B to basename of F and then list B* files
+B=${F%.?*}
+ls -l $B*

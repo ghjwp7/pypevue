@@ -1,3 +1,4 @@
+.. -*- mode: rst -*-
 =======
 pypevue
 =======
@@ -20,6 +21,11 @@ the program; getting pypevu to run automatically, or OpenSCAD to
 update automatically, when you change a source file; and how to create
 software plugins.
 
+**For details about how to write scripts, see LibreOffice file
+pypevu.dox.odt or PDF file pypevu.dox.pdf** in the docs subdirectory.
+For script-file examples, see examples/eg-* files (ie, files in the
+examples subdirectory, with names that begin with "eg-").
+
 Software requirements
 =====================
 
@@ -28,10 +34,7 @@ your system.  [An early version of pypevu ("pipeVue0.py") also
 required the `SolidPython` module, but this version does not.]
 
 Obtain files pypevu.py, pypevu.codeBase.scad, __init__.py,
-baseFuncs.py, and a script file for the drawing you wish to make.  For
-script-file examples, see the files in the examples directory whose
-names start with "eg-".  **For details about how to write scripts, see
-the LibreOffice file docs/pypevu.dox.odt or PDF file docs/pypevu.dox.pdf.**
+baseFuncs.py, and a script file for the drawing you wish to make.
 
 Running the program
 =====================
