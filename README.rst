@@ -104,31 +104,34 @@ User functions vs Base functions
 Functions defined with plugin modules can be *user functions* or *base
 functions*.
 
-**Base functions** (as listed in a tell() statement at the end of
-baseFuncs.py) control how pypevu gets and treats its inputs and how it
-produces its output.  To change intrinsic functionality of some part
-of the program, copy the relevant function from baseFuncs.py into your
-own module, and modify it to produce what you need in your own
-application.  If you change any base function calling sequences,
-change all uses for consistency.  If you want to call an original base
-function from your substitute for it, import it from baseFuncs and
-refer to it via the import.  For example, a substitute for addEdge
-could import the base version of addEdge via "from pypevue.baseFuncs
-import addEdge as baseAddEdge" and could call it via "baseAddEdge(v,w,
-layout)" or similar.
+**Base functions** (functions with names as listed in the tell()
+statement at the end of baseFuncs.py) control how pypevu gets and
+treats its inputs and how it produces its output.  To change intrinsic
+functionality of some part of the program, copy the relevant function
+from baseFuncs.py into your own module, and modify it to produce what
+you need in your own application.  If you change any base function
+calling sequences, change all uses for consistency.  If you want to
+call an original base function from your substitute for it, import it
+from baseFuncs and refer to it via the import.  For example, a
+substitute for addEdge could import the base version of addEdge via
+"from pypevue.baseFuncs import addEdge as baseAddEdge" and could call
+it via "baseAddEdge(v,w, layout)" or similar.
 
 **User functions** have names not equal to any base function.  That
 is, a function defined in a plugins module and listed in a tell()
 statement is a user function if it isn't a base function.  You can
 call your function by a U code in a layout section.  For example, if
-"U myPIf5 1,2,4;" appears in a layout section, pypevu will say
-something equivalent to "myPIf5(1.0, 2.0, 4.0)" at that point in its
-processing.  The function will be called with as many numerical
-parameters as the U code gives it. [*In a future release simple calls
-within arithmetic sections of a script will be supported, allowing you
-to give the function whatever arguments seem suitable, vs present
-calls like `ref.uDict['myPIf5'](paramlist)` instead of
-`myPIf5(paramlist)` *]
+"U mything 1,2,4;" appears in a layout section, pypevu will issue
+`mything(1.0, 2.0, 4.0)` at that point in its processing.  The
+function will be called with as many numerical parameters as the U
+code gives it. Note, mything() should be a defined and registered
+function; for example, if mything() is in myPI.py, use `=P
+Plugins=myPI` in script, and in myPI.py say `def mything(someargs)
+... def tell(): return (mything,)`
+
+[ *In a future release, calls within arithmetic sections of a script
+will be supported in a simpler form (like `mything(paramlist)`), vs
+the present form (like `ref.uDict['mything'](paramlist)`)* ]
 
 
 
