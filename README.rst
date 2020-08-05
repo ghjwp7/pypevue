@@ -101,10 +101,10 @@ precedence.
 User functions vs Base functions
 =====================
   
-Functions defined with plugin modules can be "user functions" or "base
-functions".
+Functions defined with plugin modules can be *user functions* or *base
+functions*.
 
-Base functions (as listed in a tell() statement at the end of
+**Base functions** (as listed in a tell() statement at the end of
 baseFuncs.py) control how pypevu gets and treats its inputs and how it
 produces its output.  To change intrinsic functionality of some part
 of the program, copy the relevant function from baseFuncs.py into your
@@ -117,17 +117,18 @@ could import the base version of addEdge via "from pypevue.baseFuncs
 import addEdge as baseAddEdge" and could call it via "baseAddEdge(v,w,
 layout)" or similar.
 
-User functions have names not equal to any base function.  That is, a
-functions defined in a plugins module and listed in a tell() statement
-is a user function if it isn't a base function.  If you call your user
-function only within an arithmetic section of a script, you can write
-it to take whatever arguments seem suitable.  However, if your
-function will be invoked by a U code in a layout section, then a call
-to it will look like userfunc(ref, p1, p2) or userfunc(ref, p1, p2,
-p3, p4) etc depending on how many numerical parameters the U code
-gives it.  For example, if "U myPIf5 1,2,4;" appears in a layout
-section, pypevu will say something equivalent to "ref.myPIf5(ref, 1.0,
-2.0, 4.0)" at that point in its processing.
+**User functions** have names not equal to any base function.  That
+is, a function defined in a plugins module and listed in a tell()
+statement is a user function if it isn't a base function.  You can
+call your function by a U code in a layout section.  For example, if
+"U myPIf5 1,2,4;" appears in a layout section, pypevu will say
+something equivalent to "myPIf5(1.0, 2.0, 4.0)" at that point in its
+processing.  The function will be called with as many numerical
+parameters as the U code gives it. [*In a future release simple calls
+within arithmetic sections of a script will be supported, allowing you
+to give the function whatever arguments seem suitable, vs present
+calls like `ref.uDict['myPIf5'](paramlist)` instead of
+`myPIf5(paramlist)` *]
 
 
 
