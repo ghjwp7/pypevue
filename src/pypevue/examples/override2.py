@@ -3,7 +3,6 @@
 '''Test-program for pypevu plugins setup'''
 
 from pypevue import FunctionList as ref
-from pypevue.pypevu import Point, Post, Cylinder, Layout
 from sys import _getframe
 import os.path
 def saywhat():

@@ -1,0 +1,25 @@
+#!/bin/sh
+
+# When this script is called, the working directory should be the
+# directory of a program.  For example, $HOME/.../pypevue/src/pypevue
+# or $HOME/.../geo_dome/src/geodome    Also see:  show-bin-lib-links
+
+# Called without an argument: Make a fresh link for $PWD among python
+# modules; for example, in $HOME/.local/lib/python3.6/site-packages/
+
+# Called with an argument: The argument should be the name of a python
+# program.  Make a fresh link for it (without .py suffix) among .local
+# python programs; for example, in $HOME/.local/bin/
+
+LLIB=$(python3 -m site --user-site)
+LBIN=$(python3 -m site --user-base)/bin
+
+if [ "$1" ]; then
+    PROG=${1}
+    BASE=${1%.py}
+    echo Making link to $PWD/$PROG as $LBIN/$BASE
+    ln  -fs  $PWD/$PROG $LBIN/$BASE
+else
+    echo Making link to $PWD in $LLIB
+    ln  -fs  $PWD  $LLIB
+fi

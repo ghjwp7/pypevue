@@ -29,6 +29,8 @@ class SystemTest(BaseTest):
     testPath = os.path.dirname(__file__)
     pypePath = os.path.normpath(f'{testPath}/../src/pypevue')
     scadPath = os.path.normpath(f'{testPath}/tmp_output_files')
+    if not os.path.exists(scadPath):
+        os.mkdir(scadPath)
     examplesPath = os.path.normpath(f'{testPath}/../src/pypevue/examples')
 
     def test_instantiate(self):
@@ -78,6 +80,7 @@ class SystemTest(BaseTest):
     def test_cap(self):     self.doRegexGroup('cap')
     def test_freq(self):    self.doRegexGroup('freq')
     def test_geo(self):     self.doRegexGroup('geo')
+    def test_user(self):    self.doRegexGroup('user')
          
 if __name__ == '__main__':
     unittest.main()

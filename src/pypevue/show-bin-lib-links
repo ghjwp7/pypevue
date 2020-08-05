@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# Report pypevue and geodome links in local python lib or bin
+# directories; that is, in .local's site-packages directory or its bin
+# directory.  Also see: new-bin-lib-links and § Command Line Interface
+# at end of <https://docs.python.org/3/library/site.html>
+
+LLIB=$(python3 -m site --user-site)
+LBIN=$(python3 -m site --user-base)/bin
+date
+echo; echo "Program Links in $LBIN:"
+[ -e "$LBIN/pypevu"   ] && ls --color -l  $LBIN/pypevu
+[ -e "$LBIN/geo_dome" ] && ls --color -l  $LBIN/geo_dome
+
+echo; echo "Module Links in $LLIB:"
+[ -e "$LLIB/pypevue" ] && ls --color -dl  $LLIB/pypevue
+[ -e "$LLIB/geodome" ] && ls --color -dl  $LLIB/geodome
+echo

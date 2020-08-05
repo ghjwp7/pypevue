@@ -30,8 +30,8 @@ required the `SolidPython` module, but this version does not.]
 Obtain files pypevu.py, pypevu.codeBase.scad, __init__.py,
 baseFuncs.py, and a script file for the drawing you wish to make.  For
 script-file examples, see the files in the examples directory whose
-names start with "eg-".  For details about how to write scripts, see
-the LibreOffice file pypevu.dox.odt or PDF file pypevu.dox.pdf.
+names start with "eg-".  **For details about how to write scripts, see
+the LibreOffice file docs/pypevu.dox.odt or PDF file docs/pypevu.dox.pdf.**
 
 Running the program
 =====================

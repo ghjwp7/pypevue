@@ -6,10 +6,9 @@ structures. -- jiw March 2020...'''
 
 from sys import argv, exit, exc_info, stderr
 import datetime
-from math import sqrt, pi, cos, sin, asin, atan2
-from pypevue.pypevu import ssq, sssq, rotate2, isTrue
-from pypevue.pypevu import Point, Post, Cylinder, Layout
-from pypevue import FunctionList
+from math import sqrt, cos, sin, asin, atan2, pi, radians, degrees
+from pypevue import ssq, sssq, rotate2, isTrue
+from pypevue import Point, Post, Cylinder, Layout, FunctionList
 
 #---------------------------------------------------------
 def arithmetic(line, xTrace):
@@ -206,7 +205,7 @@ def generatePosts(code, numberTexts, func):
         if nums:
             n, r, a0 = int(nums[0]), nums[1], nums[2]
             theta = 2*pi/n
-            x, y = rotate2(r, 0, a0*pi/180) # a0 in degrees
+            x, y = rotate2(r, 0, radians(a0)) # a0 in degrees
             for post in range(n):
                 postAt(bx+x, by+y, bz)
                 x, y = rotate2(x, y,theta)
@@ -228,59 +227,9 @@ def generatePosts(code, numberTexts, func):
                 y += dy
             return
     if code=='U':               # Call a function
-        f = ref[func](*getNums(0,Lots))
+        f = ref.uDict[func](*getNums(0,Lots))
     return                      # We might fail or fall thru
-
-def postTop(p, OP):   # Given post location p, return loc. of post top
-    ref = FunctionList
-    x, y, z = p.foot.x, p.foot.y, p.foot.z
-    ox, oy, oz = (x, y, z-99) if ref.postAxial else (OP.x, OP.y, OP.z)
-    u = ref.SF*ref.postHi       # Distance from p to post-top
-    v = sssq(x-ox, y-oy, z-oz)  # Distance from p to origin point
-    if v>0.01:
-        a, b = (u+v)/v, -u/v    # Extrapolation ratios a + b = 1
-        tx, ty, tz = a*x+b*ox, a*y+b*oy, a*z+b*oz
-    else:
-        tx, ty, tz = x, y, z+u  # Fallback if p ~ OP
-    siny = min(1, max(-1, (tz-z)/u)) # Don't let rounding error shut us down
-    yAxisAngle = (pi/2 - asin(siny)) * 180/pi
-    zAxisAngle =  atan2(ty-y, tx-x)  * 180/pi
-    return Point(tx,ty,tz), round(yAxisAngle,2), round(zAxisAngle,2)
-
-#=========================================================
-def scriptCyl(ss, preCyl):
-    ref = FunctionList
-    post1, post2, lev1, lev2, colo, thix, gap, nonPost, num = preCyl.get9()
-    mode = 0                    # mode 0 = comments at start
-    pc, code = '?', '?'
-    for cc in ss:            
-        if pc == '#':       # Insert a simple variable's value
-            post1, post2 = post2, ref.userLocals[cc]
-            nonPost = False
-        elif cc in ref.colors: colo = cc
-        elif cc in ref.thixx: thix  = cc
-        elif cc in ref.levels:
-            lev1, lev2 = lev2, cc
-        elif cc in ref.digits:
-            if pc in ref.digits:  post2 = post2 + cc
-            else:             post1, post2 = post2, cc
-            nonPost = False
-        elif cc=='/':
-            lev1, lev2 = lev2, lev1
-        elif cc==';':
-            p1, p2 = int(post1), int(post2)
-            if nonPost:
-                p1, p2 = p1+1, p2+1
-                post1, post2 = str(p1), str(p2)
-            num = len(ref.LO.cyls)
-            cyl = Cylinder(p1, p2, lev1, lev2, colo, thix, gap, 0, num)
-            ref.LO.cyls.append(cyl)
-            addEdges(p1, p2, ref.LO) # Add edges p1,p2 and p2,p1 to edges list
-            nonPost = True
-        pc = cc
-    preCyl.put9(post1, post2, lev1, lev2, colo, thix, gap, nonPost, num)
-    return preCyl
-#==================================
+#===============================================
 def scriptPost(ss, prePost):
     ref = FunctionList
     codes = 'BCDEGHILOPRSTU'
@@ -316,8 +265,42 @@ def scriptPost(ss, prePost):
         pc = cc             # Prep to get next character
     prePost.data = numbers
     return
-#==================================
+#=========================================================
+def scriptCyl(ss, preCyl):
+    ref = FunctionList
+    post1, post2, lev1, lev2, colo, thix, gap, nonPost, num = preCyl.get9()
+    mode = 0                    # mode 0 = comments at start
+    pc, code = '?', '?'
+    for cc in ss:            
+        if pc == '#':       # Insert a simple variable's value
+            post1, post2 = post2, ref.userLocals[cc]
+            nonPost = False
+        elif cc in ref.colors: colo = cc
+        elif cc in ref.thixx: thix  = cc
+        elif cc in ref.levels:
+            lev1, lev2 = lev2, cc
+        elif cc in ref.digits:
+            if pc in ref.digits:  post2 = post2 + cc
+            else:             post1, post2 = post2, cc
+            nonPost = False
+        elif cc=='/':
+            lev1, lev2 = lev2, lev1
+        elif cc==';':
+            p1, p2 = int(post1), int(post2)
+            if nonPost:
+                p1, p2 = p1+1, p2+1
+                post1, post2 = str(p1), str(p2)
+            num = len(ref.LO.cyls)
+            cyl = Cylinder(p1, p2, lev1, lev2, colo, thix, gap, 0, num)
+            ref.LO.cyls.append(cyl)
+            addEdges(p1, p2, ref.LO) # Add edges p1,p2 and p2,p1 to edges list
+            nonPost = True
+        pc = cc
+    preCyl.put9(post1, post2, lev1, lev2, colo, thix, gap, nonPost, num)
+    return preCyl
+#===============================================
 def runScript(scripts):
+    '''Process scripts (a list of lines) line by line'''
     ref = FunctionList
     preCyl = Cylinder(0, 1, 'c','c', 'G', 'p', ref.endGap, True, 0)
     #print (f'runScript: preCyl = {preCyl}  preCyl.gap={preCyl.gap}  ref.endGap={ref.endGap}')
@@ -329,7 +312,9 @@ def runScript(scripts):
         if   l2=='=C': mode = 'C'; ll=ss # Cylinders
         elif l2=='=L': mode = 'L'; ll=ss # Layout
         
-        elif l2=='=P':          # Process Parameters line
+        elif l2=='=P':
+            # Process current line of params, and let command params
+            # in paramTxt override if necessary
             ref.installParams((ss, ref.paramTxt));
             continue
         elif l2=='=A':          # Process Arithmetic line
@@ -343,7 +328,25 @@ def runScript(scripts):
         elif mode == 'C':       # Process Cylinders line
             preCyl.gap = ref.endGap
             ref.scriptCyl (ll, preCyl)
-#==================================
+#===============================================
+def postTop(p, OP):   # Given post location p, return loc. of post top
+    ref = FunctionList
+    x, y, z = p.foot.x, p.foot.y, p.foot.z
+    ox, oy, oz = (x, y, z-99) if ref.postAxial else (OP.x, OP.y, OP.z)
+    u = ref.SF*ref.postHi       # Distance from p to post-top
+    v = sssq(x-ox, y-oy, z-oz)  # Distance from p to origin point
+    if v>0.01:
+        a, b = (u+v)/v, -u/v    # Extrapolation ratios a + b = 1
+        tx, ty, tz = a*x+b*ox, a*y+b*oy, a*z+b*oz
+    else:
+        tx, ty, tz = x, y, z+u  # Fallback if p ~ OP
+    siny = min(1, max(-1, (tz-z)/u)) # Don't let rounding error shut us down
+    yAxisAngle = degrees(pi/2 - asin(siny))
+    zAxisAngle = degrees(atan2(ty-y, tx-x))
+    #zt =  atan2(ty-y, tx-x) * 180/pi
+    #print (f'postTop  diff zangle: {zt-zAxisAngle:6.6e}   zt {zt}   zA {zAxisAngle}')
+    return Point(tx,ty,tz), round(yAxisAngle,2), round(zAxisAngle,2)
+#===============================================
 def writePosts(fout):
     ref = FunctionList
     try:
@@ -375,7 +378,7 @@ module makePosts() {
 ''')
     fout.write('}\n')           # close the module
 
-#==================================
+#===============================================
 def writeLabels(fout):
     ref = FunctionList
     if not isTrue(ref.postLabel):
@@ -397,8 +400,7 @@ module makeLabels() {'{'}\n''')
         fout.write(f'''  oneLabel({p.diam/3:0.3f}, {p.yAngle:0.3f}, "{str(p.num)}",  {str(lxyz)});\n''')
     fout.write('}\n')           # close the module
 
-#=====================================
-
+#==================================================
 def writeCylinders(fout, clo, chi, listIt, startFin):
     '''Write openSCAD code to generate pipes between posts.  We process
     from cylinder clo to chi-1, printing cylinder data if listIt is
@@ -434,8 +436,8 @@ module makeCylinders() {\n''')
         if isTrue(listIt):
             print (f'Make {cyl}  L {L:2.2f}  {cName}')
         # Use min/max to avoid exception from dz/L numerical error
-        yAngle = round((pi/2 - asin(min(1, max(-1, dz/L)))) * 180/pi, 2)
-        zAngle = round( atan2(dy, dx)      * 180/pi, 2)
+        yAngle = round(degrees(pi/2 - asin(min(1, max(-1, dz/L)))), 2)
+        zAngle = round(degrees(atan2(dy, dx)), 2)
         fout.write(f'''  oneCyl ({cyl.diam:0.3f}, {L-2*gap:0.3f}, [0, {yAngle:0.3f}, {zAngle:0.3f}], [{cc.x:0.3f}, {cc.y:0.3f}, {cc.z:0.3f}], {cName});\n''')
 
     if startFin & 2:
@@ -471,11 +473,14 @@ def autoAdder(fout):    # See if we need to auto-add cylinders
         writeCylinders(fout, clo, len(rlo.cyls), ref.autoList, 2)
 #-------------------------------------------------------------
 def installParams(script):
-    '''Given script lines that are Parameter-setting lines, this extracts
-    variable names and values from it, like "var1=val1 var2=val2
-    var3=val3 ...".  It converts the values to numeric forms, and
-    stores them in globals() dict.  Note, white space is taboo within
-    a var=val item.    '''
+    '''Given a script line or lines that are Parameter-setting lines, this
+    treats variable names and value settings, like "var1=val1
+    var2=val2 var3=val3 ...".  It converts the values to numeric
+    forms, and stores them in globals() dict.  Notes: White space is
+    taboo within a var=val item. Variables specified multiple times
+    will be overwritten each time with each value enduring until
+    overwritten.  Plugins settings are pre-processed via
+    makePluginsList() as well as here. '''
     ref = FunctionList
     flubs = False
     for parTxt in script:
@@ -506,7 +511,7 @@ def setClipAndRota(c):
     phi = (1+sqrt(5))/2;   r = sqrt(2+phi)
     # Set default Z rotation to 0 instead of -18, so that FRA2 works
     # ok in makeIcosaGeo genIcosahedron()
-    c.LO.rotavec = Point(0, asin(phi/r)*180/pi, 0) # X,Y,Z rotations
+    c.LO.rotavec = Point(0, degrees(asin(phi/r)), 0) # X,Y,Z rotations
 #-------------------------------------------------------------
 def setCodeFrontAndBack(c):
     c.date = datetime.datetime.today().strftime('%Y-%m-%d  %H:%M:%S')
