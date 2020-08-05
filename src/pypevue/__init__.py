@@ -65,6 +65,7 @@ class Point:
         return (self.y*q.z - self.z*q.y, self.z*q.x - self.x*q.z, self.x*q.y - self.y*q.x)
     def norm(self):
         mag = sssq(self.x, self.y, self.z)
+        if mag == 0: return (0, 0, 0)
         return (self.x / mag, self.y / mag, self.z / mag)
     def diff(self, q):
         return (self.x-q.x, self.y-q.y, self.z-q.z)
