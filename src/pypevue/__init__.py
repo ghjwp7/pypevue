@@ -48,78 +48,35 @@ def isTrue(x):
 
 #==========1===========Point=========================
 class Point:
+    '''3D (x,y,z) points or vectors, with associated methods scale,
+    scalexy, inner, cross, norm (a unit vector), mag (scalar
+    magnitude), diff, add.  Also
+    '''
     def __init__(self, x=0, y=0, z=0):
         self.x = x
         self.y = y
         self.z = z
-    def scale(self, s):
+    def scale(self, s):         # s*self
         self.x = s*self.x
         self.y = s*self.y
         self.z = s*self.z
-    def scalexy(self, s):
+    def scalexy(self, s):       # (s*self.x, s*self.y,  self.z)
         self.x = s*self.x
         self.y = s*self.y
-    def inner(self, q):         # Inner product of two 3-vectors
+    def inner(self, q):         # Inner product, self * q
         return (self.x*q.x + self.y*q.y + self.z*q.z)
-    def cross(self, q):         # cross product of the two 3-vectors
+    def cross(self, q):         # Cross product, self x q
         return (self.y*q.z - self.z*q.y, self.z*q.x - self.x*q.z, self.x*q.y - self.y*q.x)
-    def norm(self):
+    def norm(self):             # unit vector along vector  self
         mag = sssq(self.x, self.y, self.z)
         if mag == 0: return (0, 0, 0)
         return (self.x / mag, self.y / mag, self.z / mag)
-    def diff(self, q):
+    def diff(self, q):          # difference of vectors:  self - q
         return (self.x-q.x, self.y-q.y, self.z-q.z)
-    def add(self, q):
+    def add(self, q):           # sum of vectors:  self + q
         return (self.x+q.x, self.y+q.y, self.z+q.z)
-    def mag(self):
+    def mag(self):              # magnitude of vector
         return sssq(self.x, self.y, self.z)
-    def str(self, places):
-        x,y,z = (round(k,places) for k in (self.x, self.y ,self.z))
-        return f'{x}, {y}, {z}'
-    def __str__( self):  return self.str(3)
-    def __repr__(self):  return self.str(8)
-    def __lt__(a, b):     # To sort points in x,y,z order
-        return (a.x < b.x) or (a.x == b.x and a.y < b.y) or (a.x == b.x and a.y == b.y and a.z <= b.z)
-
-#==========2==========IcosaGeoPoint(Point)=============
-class IcosaGeoPoint(Point):
-    facess = [(1,2,3,4,5), (6,7,8,9,10,11,12,13,14,15), (16,17,18,19,20)]
-    def __init__(self, x, y, z, freq, rank = None, face = None, step = None, stepInRank = None, num=None, nnbrs = None, dupl = None):
-        super().__init__(x,y,z)
-        self.freq = freq
-        self.rank = rank
-        self.face = face
-        self.step = step
-        self.stepInRank = stepInRank
-        self.num = num
-        self.nnbrs = nnbrs #the number of struts connected to this node
-        self.dupl = dupl
-
-    @property
-    def stepsInRank(self):
-        if self.rank <= self.freq:
-            steps = self.rank * 5
-        elif self.rank <= 2 * self.freq:
-            steps = self.freq * 5
-        else:
-            steps = (self.freq - (self.rank - self.freq * 2)) * 5
-        return steps
-
-    @property
-    def topFaces(self):
-        return self.facess[0]
-    @property
-    def midFaces(self):
-        return self.facess[1]
-    @property
-    def bottomFaces(self):
-        return self.facess[2]
-    @property
-    def botFaces(self):
-        return self.facess[2]
-    @property
-    def radius(self):
-        return sqrt(self.x**2 + self.y**2 + self.z**2)
 
     def nutation(self, q):
         ''' 
@@ -146,25 +103,24 @@ class IcosaGeoPoint(Point):
             angle = -angle
         return degrees(angle)
 
-    def _angleLineSlopeToPlane(self, plane, lineSlope):
-        '''
-        return the angle (in radians) between a plane and a 3D line defined by it slope
-        https://www.superprof.co.uk/resources/academic/maths/analytical-geometry/distance/angle-between-line-and-plane.html 
-        '''
-        show = False
-        if show: print(f'in angle() with plane ({plane}), line ({lineSlope})')
+    def _angleLineSlopeToPlane(self, plane, lineSlope, show=False):
+        '''Return the angle (in radians) between a plane (defined by a
+        3-vector normal to the plane at the origin) and a 3D line
+        through the origin (defined by three slopes).  Reference:
+        https://www.superprof.co.uk/resources/academic/maths/analytical-geometry/distance/angle-between-line-and-plane.html        '''
+        
+        if show: print(f'in angleLineSlopeToPlane() with plane ({plane}), line ({lineSlope})')
         pl = plane
-        m = lineSlope # slope
-        # the dot product is proportional to the cosine of the angle between two vectors
-        # in this case the vector defining the plane which is normal to the plane
-        plInnerM = abs(pl.inner(m)) # inner product is equivalent to dot product
-        #magnitude of the vector normal to the plane
-        plMag = sqrt(pl.x**2 + pl.y**2 + pl.z**2)
-        # magnitude of the vector corresponding to the slope from p to q
-        mMag = sqrt(m.x**2 + m.y**2 + m.z**2)
-        # normalize the dot product to the magnitude of the two vectors
-        # since the plane angle is normal to the plane, we want the arcsine
-        # instead of the arccosine 
+        m = lineSlope         
+        # The following dot product (inner product) is proportional to
+        # the cosine of the angle between two vectors; one of them being
+        # the normal vector of the plane
+        plInnerM = abs(pl.inner(m))      
+        plMag = pl.mag()  # magnitude of plane's normal vector
+        mMag = m.mag()    # magnitude of vector of slopes        
+        # Normalize the dot product to the magnitude of the two vectors.
+        # Because the plane's normal is normal to the plane, we want
+        # arcsine rather than arccosine 
         if show: print(f'  plInnerM {plInnerM:1.2f},  plMag {plMag:1.2f}, mMag {mMag:1.2f}, plInnerM / (plMag * mMag) {plInnerM / (plMag * mMag)}')
         sinOfAngle = plInnerM / (plMag * mMag)
         sinOfAngle = min(1, max(0, sinOfAngle))
@@ -203,13 +159,12 @@ class IcosaGeoPoint(Point):
         angleCos = min(1, angleCos)
         return degrees(acos(angleCos))
 
-    def precession(self, q):
+    def precession(self, q, show=False):
         '''
         Angle from the plane created by the tangent line to the circle on the sphere at height z and the origin, 
         to the vector from this point to q.
         https://www.youtube.com/watch?v=Zbiclnu2IlU @ 14:50 min:sec
         '''
-        show = False
         p = self
         if show: print(f'in precession() with p ({p}), q ({q})')
 
@@ -270,6 +225,57 @@ class IcosaGeoPoint(Point):
             angle -= 2*pi
         if show: print(f'  returning angle {degrees(angle):1.2f}deg')
         return degrees(angle)
+
+    #=====  Point:  display & comparison methods  =====
+    def str(self, places):
+        x,y,z = (round(k,places) for k in (self.x, self.y ,self.z))
+        return f'{x}, {y}, {z}'
+    def __str__( self):  return self.str(3)
+    def __repr__(self):  return self.str(8)
+    def __lt__(a, b):     # To sort points in x,y,z order
+        return (a.x < b.x) or (a.x == b.x and a.y < b.y) or (a.x == b.x and a.y == b.y and a.z <= b.z)
+
+
+
+#==========2==========IcosaGeoPoint(Point)=============
+class IcosaGeoPoint(Point):
+    facess = [(1,2,3,4,5), (6,7,8,9,10,11,12,13,14,15), (16,17,18,19,20)]
+    def __init__(self, x, y, z, freq, rank = None, face = None, step = None, stepInRank = None, num=None, nnbrs = None, dupl = None):
+        super().__init__(x,y,z)
+        self.freq = freq
+        self.rank = rank
+        self.face = face
+        self.step = step
+        self.stepInRank = stepInRank
+        self.num = num
+        self.nnbrs = nnbrs #the number of struts connected to this node
+        self.dupl = dupl
+
+    @property
+    def stepsInRank(self):
+        if self.rank <= self.freq:
+            steps = self.rank * 5
+        elif self.rank <= 2 * self.freq:
+            steps = self.freq * 5
+        else:
+            steps = (self.freq - (self.rank - self.freq * 2)) * 5
+        return steps
+
+    @property
+    def topFaces(self):
+        return self.facess[0]
+    @property
+    def midFaces(self):
+        return self.facess[1]
+    @property
+    def bottomFaces(self):
+        return self.facess[2]
+    @property
+    def botFaces(self):
+        return self.facess[2]
+    @property
+    def radius(self):
+        return sqrt(self.x**2 + self.y**2 + self.z**2)
 
     def __repr__(self):
         return f'num {self.num}, rank {self.rank}, face {self.face}, step {self.step}, nnbrs {self.nnbrs}, dupl {self.dupl}, coords ({self.x:1.2f}, {self.y:1.2f}, {self.z:1.2f})'
