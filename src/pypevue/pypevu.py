@@ -121,13 +121,20 @@ def main(args):
     ref.runScript(ref.scripts)    # Run selected script
     ref.setCodeFrontAndBack(ref)  # Set up beginning and ending SCAD code
     with open(ref.scadFile, 'w') as fout:
+        ref.hookFront     (fout)
         fout.write(ref.frontCode)
+        ref.hookPosts     (fout)
         ref.writePosts    (fout)
+        ref.hookLabels    (fout)
         ref.writeLabels   (fout)
+        ref.hookCylinders (fout)
         ref.writeCylinders(fout, 0, len(ref.LO.cyls), ref.cylList,
                            1 if ref.autoMax>0 else 3)
+        ref.hookAdder     (fout)
         ref.autoAdder     (fout)
+        ref.hookBack      (fout)
         fout.write(ref.backCode)
+        ref.hookFinal    (fout)
     t1 = time.time()-t0
     print (f'For script "{ref.f}", pypevu wrote code to {ref.scadFile} at {ref.date} in {t1:0.3f} seconds')
 

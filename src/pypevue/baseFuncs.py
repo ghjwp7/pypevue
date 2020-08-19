@@ -343,6 +343,8 @@ def postTop(p, OP):   # Given post location p, return loc. of post top
     siny = min(1, max(-1, (tz-z)/u)) # Don't let rounding error shut us down
     yAxisAngle = degrees(pi/2 - asin(siny))
     zAxisAngle = degrees(atan2(ty-y, tx-x))
+    #yAxisAngle = (pi/2 - asin(siny)) * 180/pi
+    #zAxisAngle = atan2(ty-y, tx-x) * 180/pi
     #zt =  atan2(ty-y, tx-x) * 180/pi
     #print (f'postTop  diff zangle: {zt-zAxisAngle:6.6e}   zt {zt}   zA {zAxisAngle}')
     return Point(tx,ty,tz), round(yAxisAngle,2), round(zAxisAngle,2)
@@ -515,25 +517,39 @@ def setClipAndRota(c):
 #-------------------------------------------------------------
 def setCodeFrontAndBack(c):
     c.date = datetime.datetime.today().strftime('%Y-%m-%d  %H:%M:%S')
+    # Find out if there's userCode to be included:
+    includer = f'include <{c.userCode}>;' if c.userCode else '//'
     c.frontCode = f'''// File {c.scadFile}, generated  {c.date}
 // by pypevu.py from script "{c.f}"
 $fn = {c.cylSegments};
 userPar0 = {c.userPar0};
 userPar1 = {c.userPar1};
 userPar2 = {c.userPar2};
-{'' if c.userCode else '//'}include <{c.userCode}>
+{includer}
 '''
-    c.backCode = f'''
-union() {'{'}
+    c.backCode = '''
+union() {
   makePosts();
   makeLabels();
   makeCylinders();
-{'}'}
+}
 '''
+#-------------------------------------------------------------
+# Hook functions -- To let user modify data or
+# output before each step of the output process
+def hookFront (fout): pass
+def hookPosts (fout): pass
+def hookLabels(fout): pass
+def hookCylinders(fout): pass
+def hookAdder (fout): pass
+def hookBack  (fout): pass
+def hookFinal (fout): pass
 #-------------------------------------------------------------
 
 def tell():
     return (addEdge, addEdges, arithmetic, autoAdder, generatePosts,
             installParams, levelAt, postTop, runScript, scriptCyl,
             scriptPost, setClipAndRota, setCodeFrontAndBack, thickLet,
-            writeCylinders, writeLabels, writePosts)
+            writeCylinders, writeLabels, writePosts,
+            hookFront, hookPosts, hookLabels, hookCylinders,
+            hookAdder, hookBack,  hookFinal)

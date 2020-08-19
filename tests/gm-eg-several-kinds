@@ -1,10 +1,10 @@
-// File pypevu.scad, generated  2020-07-17  18:53:35
+// File pypevu.scad, generated  2020-08-09  22:01:01
 // by pypevu.py from script "../src/pypevue/examples/eg-several-kinds"
 $fn = 30;
 userPar0 = "";
 userPar1 = "";
 userPar2 = "";
-//include <>
+//
 
 module onePost (diam, hi, yA, zA, px, py, pz)
   translate (v=[px, py, pz]) rotate(a=[0, yA, zA])

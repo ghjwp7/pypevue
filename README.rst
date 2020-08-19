@@ -29,12 +29,14 @@ examples subdirectory, with names that begin with "eg-").
 Software requirements
 =====================
 
-To use the program, you need to have python3 and OpenSCAD installed on
-your system.  [An early version of pypevu ("pipeVue0.py") also
-required the `SolidPython` module, but this version does not.]
-
-Obtain files pypevu.py, pypevu.codeBase.scad, __init__.py,
-baseFuncs.py, and a script file for the drawing you wish to make.
+To use the program, you need to have python3 installed on your system
+and also should have openscad installed.  Install pypevu using [in
+future] pip3 or [at moment] by copying files pypevu.py, __init__.py,
+baseFuncs.py, makeIcosaGeo.py into a directory called pypevue.  Get a
+script file for the object you wish to make, and say pypevu f=<sf>
+where <sf> is the script file name.  (If pypevu or the pypevue module
+isn't found, run ./new-bin-lib-links in the pypevue directory.) After
+pypevu runs, view the 3D result via a command like openscad pypevu.scad .
 
 Running the program
 =====================
@@ -124,7 +126,7 @@ functions via U codes in layout sections.  For example, if "U mything
 2.0, 4.0)` at that point in its processing.  The function will be
 called with as many numerical parameters as the U code gives it. Note,
 `mything()` should be well-defined.  For example, if mything() code
-(like `def mything(someargs: ...`) is in myPI.py, use `=P
+(like `def mything(someargs): ...`) is in myPI.py, use `=P
 Plugins=myPI` in your script, and in myPI.py also say `def tell():
 return (mything,)`.  Via proper imports, user functions can access
 pypevu data structures.  For examples see `examples/userfuncs1.py`.
