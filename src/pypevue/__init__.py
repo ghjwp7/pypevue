@@ -75,8 +75,8 @@ class Point:
     def norm(self):
         '''Return a unit vector, aligned with self; or (0,0,0)'''
         mag = sssq(self.x, self.y, self.z)
-        if mag == 0: return (0, 0, 0)
-        return (self.x / mag, self.y / mag, self.z / mag)
+        if mag == 0: return Point(0, 0, 0)
+        return Point(self.x / mag, self.y / mag, self.z / mag)
     def diff(self, q):
         '''Return vector difference, self - arg'''
         return (self.x-q.x, self.y-q.y, self.z-q.z)
@@ -137,50 +137,40 @@ class Point:
         return angle
 
     def distanceToPlane(self, pl):
+        '''Return shortest distance from self to the plane with normal pl
         '''
-        return the shortest distance from self to the plane pl
-        '''
-        pln = pl.norm()
-        plNorm = Point(pln[0], pln[1], pln[2])
-        return self.inner(plNorm)
+        return self.inner(pl.norm())
 
     def projectionOnPlane(self, pl):
+        '''Find projection of self onto plane with normal pl
         '''
-        find the projection of this vector onto a plane
-        '''
-        pln = pl.norm()
-        plNorm = Point(pln[0], pln[1], pln[2])
+        plNorm = pl.norm()
         pPerpMag = self.inner(plNorm)
         plNorm.scale(pPerpMag)
         pPerp = plNorm
         return self.diff(pPerp)
 
     def angle(self, q):
-        '''
-        angle between vector me and another vector q
+        '''Return angle (in degrees) between vector self and vector q
         '''
         try:
             angleCos = self.inner(q) / (self.mag() * q.mag())
         except ZeroDivisionError as e:
             angleCos = -1
-        angleCos = max(-1, angleCos)
-        angleCos = min(1, angleCos)
+        angleCos = min(1, max(-1, angleCos))
         return degrees(acos(angleCos))
 
     def precession(self, q, show=False):
-        '''
-        Angle from the plane created by the tangent line to the circle on the sphere at height z and the origin, 
-        to the vector from this point to q.
-        https://www.youtube.com/watch?v=Zbiclnu2IlU @ 14:50 min:sec
-        '''
+        '''Return angle (in radians) from the plane created by the tangent
+        line to the circle on the sphere at height z and the origin,
+        to the vector from this point to q.  Reference:
+        https://www.youtube.com/watch?v=Zbiclnu2IlU @ 14:50 min:sec '''
         p = self
         if show: print(f'in precession() with p ({p}), q ({q})')
 
         # we need to remove the effects of the nutation angle on the precession angle
         # define the plane tangent to the sphere at p
-        plts = Point(2*p.x, 2*p.y, 2*p.z) # plane of tangent sphere
-        pltsn = plts.norm()
-        pltsNorm = Point(pltsn[0], pltsn[1], pltsn[2])
+        pltsNorm = Point(2*p.x, 2*p.y, 2*p.z).norm()
         nut = radians(self.nutation(q))
 
         #find the component of q-p perpendicular to the tangent plane of the sphere at p
@@ -197,7 +187,7 @@ class Point:
             aa = p.add(qMpMpqPerp)
             qProj = Point(aa[0], aa[1], aa[2]) # PROBLEM!!!
             nutCheck = radians(self.nutation(qProj))
-            print(f'  plts ({plts}), pltsNorm ({pltsNorm}), nutation {degrees(nut):1.2f}deg, qMp ({qMp}), qMpMag {qMpMag:1.2f}, pltsMag = {pltsMag:1.2f}, pqPerp = ({pqPerp}), qMpMpqPerp = ({qMpMpqPerp}), qProj ({qProj}),  nutCheck {degrees(nutCheck):1.2f}deg (should be 0)')
+            print(f'  pltsNorm ({pltsNorm}), nutation {degrees(nut):1.2f}deg, qMp ({qMp}), qMpMag {qMpMag:1.2f}, pltsMag = {pltsMag:1.2f}, pqPerp = ({pqPerp}), qMpMpqPerp = ({qMpMpqPerp}), qProj ({qProj}),  nutCheck {degrees(nutCheck):1.2f}deg (should be 0)')
 
         dx = 0.1
         if (-dx < self.x < dx) and (-dx < self.y < dx):
