@@ -56,34 +56,42 @@ class Point:
         self.x = x
         self.y = y
         self.z = z
-    def scale(self, s):         # s*self
+    def scale(self, s):
+        '''Return s*self, with argument = scale factor s'''
         self.x = s*self.x
         self.y = s*self.y
         self.z = s*self.z
     def scalexy(self, s):       # (s*self.x, s*self.y,  self.z)
+        '''scalexy(self, s), with argument = scale factor s,
+        scales the x and y components of self.'''
         self.x = s*self.x
         self.y = s*self.y
-    def inner(self, q):         # Inner product, self * q
+    def inner(self, q):
+        '''Return inner product of self with argument q'''
         return (self.x*q.x + self.y*q.y + self.z*q.z)
-    def cross(self, q):         # Cross product, self x q
+    def cross(self, q):
+        '''Return vector cross product, self x arg. q'''
         return (self.y*q.z - self.z*q.y, self.z*q.x - self.x*q.z, self.x*q.y - self.y*q.x)
-    def norm(self):             # unit vector along vector  self
+    def norm(self):
+        '''Return a unit vector, aligned with self; or (0,0,0)'''
         mag = sssq(self.x, self.y, self.z)
         if mag == 0: return (0, 0, 0)
         return (self.x / mag, self.y / mag, self.z / mag)
-    def diff(self, q):          # difference of vectors:  self - q
+    def diff(self, q):
+        '''Return vector difference, self - arg'''
         return (self.x-q.x, self.y-q.y, self.z-q.z)
-    def add(self, q):           # sum of vectors:  self + q
+    def add(self, q):
+        '''Return vector sum, self + arg'''
         return (self.x+q.x, self.y+q.y, self.z+q.z)
-    def mag(self):              # magnitude of vector
+    def mag(self):
+        '''Return magnitude of vector self; equal to sqrt(s dot s')'''
         return sssq(self.x, self.y, self.z)
 
     def nutation(self, q):
-        ''' 
-        Angle from the tangent plane of the sphere at this point, 
-        to the vector from this point to q.
-        https://www.superprof.co.uk/resources/academic/maths/analytical-geometry/distance/angle-between-line-and-plane.html 
-        '''
+        '''Let s = self; let d = q-s = vector from s to q; and let p = plane
+        that's tangent at point s to the sphere of which vector s is a
+        radius.  Return angle (in degrees) between d and p.  Reference:
+        https://www.superprof.co.uk/resources/academic/maths/analytical-geometry/distance/angle-between-line-and-plane.html        '''
         # use p for the point of this class
         p = self
         # define the plane tangent to the sphere at p
@@ -130,7 +138,7 @@ class Point:
 
     def distanceToPlane(self, pl):
         '''
-        return the shortest distance from myself to the plane pl
+        return the shortest distance from self to the plane pl
         '''
         pln = pl.norm()
         plNorm = Point(pln[0], pln[1], pln[2])
