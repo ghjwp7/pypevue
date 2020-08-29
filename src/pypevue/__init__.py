@@ -48,44 +48,80 @@ def isTrue(x):
 
 #==========1===========Point=========================
 class Point:
-    '''3D (x,y,z) points or vectors, with associated methods scale,
-    scalexy, inner, cross, norm (a unit vector), mag (scalar
-    magnitude), diff, add.  Also
+    '''3D (x,y,z) points or vectors, with methods and overloaded operators.
+
+    Methods include scale, scalexy, inner, cross, norm (a unit
+    vector), mag (scalar magnitude), diff, add.
+
+    Overloaded operators are + - * & as follows, where u, v are
+    vectors and s is a scalar:
+
+    u + v   Vector sum of u and v
+    u - v   Vector difference, u-v
+    u * v   Dot or inner product (a scalar), equal to u.dot(v)
+    u & v   Cross product, u x v, a vector,  equal to u.cross(v)
+    s * v   Scalar times vector (scaled vector)
+            (Note, v * s is not supported)
+
     '''
     def __init__(self, x=0, y=0, z=0):
         self.x = x
         self.y = y
-        self.z = z
-    def scale(self, s):
-        '''Return s*self, with argument = scale factor s'''
-        self.x = s*self.x
-        self.y = s*self.y
-        self.z = s*self.z
-    def scalexy(self, s):       # (s*self.x, s*self.y,  self.z)
-        '''scalexy(self, s), with argument = scale factor s,
-        scales the x and y components of self.'''
-        self.x = s*self.x
-        self.y = s*self.y
+        self.z = z        
+    def __add__(self, v):
+        '''Vector sum, self + v'''
+        return Point(self.x+v.x, self.y+v.y, self.z+v.z)
+    def __sub__(self, v):
+        '''Vector difference, u-v'''
+        return Point(self.x-v.x, self.y-v.y, self.z-v.z)
+    def __mul__(self, v):
+        '''Scalar, dot product of self with argument q'''
+        return self.x*v.x + self.y*v.y + self.z*v.z
+    def __rmul__(self, s):
+        '''s * v is a scaled vector, s times self'''
+        return Point(s*self.x, s*self.y, s*self.z)
+    def __and__(self, v):
+        '''Vector cross product, self cross v'''
+        return Point(self.y*v.z - self.z*v.y, self.z*v.x - self.x*v.z, self.x*v.y - self.y*v.x)
+    def __getitem__(self, key):
+        '''Return x, y, or z for indices 0, 1, 2'''
+        if key<2:
+            if key: return self.y
+            else: return self.x
+        if key>2: raise IndexError
+        else: return self.z
+    
+    def add(self, q):
+        '''Return a vector sum, self + arg'''
+        return self + q
+    def diff(self, q):
+        '''Vector difference'''
+        return self - q
     def inner(self, q):
-        '''Return inner product of self with argument q'''
-        return (self.x*q.x + self.y*q.y + self.z*q.z)
+        '''Scalar inner product of self with vector q'''
+        return self * q
     def cross(self, q):
-        '''Return vector cross product, self x arg. q'''
-        return (self.y*q.z - self.z*q.y, self.z*q.x - self.x*q.z, self.x*q.y - self.y*q.x)
+        '''Vector cross product, self cross q'''
+        return self & q
+    
+    def mag(self):
+        '''Return magnitude of vector self; equal to sqrt(s dot s')'''
+        return sssq(self.x, self.y, self.z)
+    def mag2(self):
+        '''Square of magnitude of vector self; equal to s dot s' '''
+        return ssq(self.x, self.y, self.z)
     def norm(self):
         '''Return a unit vector, aligned with self; or (0,0,0)'''
         mag = sssq(self.x, self.y, self.z)
         if mag == 0: return Point(0, 0, 0)
         return Point(self.x / mag, self.y / mag, self.z / mag)
-    def diff(self, q):
-        '''Return vector difference, self - arg'''
-        return (self.x-q.x, self.y-q.y, self.z-q.z)
-    def add(self, q):
-        '''Return vector sum, self + arg'''
-        return (self.x+q.x, self.y+q.y, self.z+q.z)
-    def mag(self):
-        '''Return magnitude of vector self; equal to sqrt(s dot s')'''
-        return sssq(self.x, self.y, self.z)
+    
+    def scale(self, s):         # 
+        '''Scale self in place, with argument = scale factor s'''
+        self.x = s*self.x;  self.y = s*self.y;  self.z = s*self.z
+    def scalexy(self, s):       # (s*self.x, s*self.y,  self.z)
+        '''Scale the x and y components of self, in place.'''
+        self.x = s*self.x;  self.y = s*self.y
 
     def nutation(self, q):
         '''Let s = self; let d = q-s = vector from s to q; and let p = plane
@@ -104,9 +140,7 @@ class Point:
         # determine if q is below or above the plane so we know the sign(+-) of the angle
         # https://math.stackexchange.com/questions/7931/point-below-a-plane
         # If v is the vector that points 'up' and p0 is some point on your plane, and finally p is the point that might be below the plane, compute the dot product v⋅(p−p0). This projects the vector to p on the up-direction. This product is {−,0,+} if p is below, on, above the plane, respectively. 
-        qpDiff = q.diff(p)
-        qpDiff = Point(qpDiff[0], qpDiff[1], qpDiff[2])
-        plInnerQP = pl.inner(qpDiff)
+        plInnerQP = pl.inner(q-p)
         if plInnerQP < 0:
             angle = -angle
         return degrees(angle)
@@ -173,20 +207,17 @@ class Point:
         pltsNorm = Point(2*p.x, 2*p.y, 2*p.z).norm()
         nut = radians(self.nutation(q))
 
-        #find the component of q-p perpendicular to the tangent plane of the sphere at p
-        qMp = q.diff(p)
-        qMp = Point(qMp[0], qMp[1], qMp[2])
-        qMpMag = qMp.mag()
-        pltsMag = sin(nut)*qMpMag 
-        pqPerp = Point(pltsNorm.x*pltsMag, pltsNorm.y*pltsMag, pltsNorm.z*pltsMag)
-        aa = qMp.diff(pqPerp)
-        m = qMpMpqPerp = Point(aa[0], aa[1], aa[2])
-        aa = p.add(m)
-        qProj = Point(aa[0], aa[1], aa[2])
+        # Find the component of q-p perpendicular to the tangent plane of the sphere at p
+        qMpMag = (q-p).mag()
+        pltsMag = sin(nut)*qMpMag
+        pqPerp = pltsMag * pltsNorm
+        m = qMpMpqPerp = (q-p)-pqPerp
+        qProj = p+m
+        
         if show:
-            aa = p.add(qMpMpqPerp)
-            qProj = Point(aa[0], aa[1], aa[2]) # PROBLEM!!!
+            qProj = p+qMpMpqPerp
             nutCheck = radians(self.nutation(qProj))
+            ### print may need fix for some tmp vars refactored out
             print(f'  pltsNorm ({pltsNorm}), nutation {degrees(nut):1.2f}deg, qMp ({qMp}), qMpMag {qMpMag:1.2f}, pltsMag = {pltsMag:1.2f}, pqPerp = ({pqPerp}), qMpMpqPerp = ({qMpMpqPerp}), qProj ({qProj}),  nutCheck {degrees(nutCheck):1.2f}deg (should be 0)')
 
         dx = 0.1
@@ -200,25 +231,20 @@ class Point:
             tv = Point(-p.y, p.x, 0) #vector in direction of tangent line
             t = Point(p.x + tv.x, p.y + tv.y, p.z) # point on the tangent line
             pl = p.cross(t)
-            pltc = Point(2*pl[0], 2*pl[1], 2*pl[2]) # plane of tangent to cicle
+            pltc = 2*pl
             if show: print(f'  tangent vector ({tv}), points on tangent line: p ({p}), t ({t}), pltc ({pltc})')
 
         angle = self._angleLineSlopeToPlane(pltc, m)
-        aa = p.cross(pltc)
-        pXpltc = Point(aa[0], aa[1], aa[2])
+        pXpltc = p & pltc  # p cross pltc
         if show: print(f'  raw angle {degrees(angle):1.2f}deg, pltc.inner(qProj) {pltc.inner(qProj)}, tv.inner(qProj) {tv.inner(qProj)}, pXpltc.inner(qProj) {pXpltc.inner(qProj)}')
         # adjust the positive acute angle based on what quadrant it is in
-        if pltc.inner(qProj) >= 0:
-            # 0-180 degrees
-            if pXpltc.inner(qProj) > 0:
-                # >90
+        if pltc*qProj >= 0:  # 0-180 degrees since pltc dot qProj >= 0
+            if pXpltc*qProj > 0:  # >90 since pXpltc dot qProj > 0
                 angle = pi - angle
-        else:
-            # 180-360
-            if pXpltc.inner(qProj) < 0:
-                # >270
+        else:  # 180-360
+            if pXpltc*qProj < 0:  # >270 since pXpltc dot qProj < 0
                 angle = pi - angle
-            angle += pi
+            angle += pi           # fix quadrant in >270 case
         if angle >= 2*pi:
             angle -= 2*pi
         if show: print(f'  returning angle {degrees(angle):1.2f}deg')

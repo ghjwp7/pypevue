@@ -99,7 +99,7 @@ def dedupClip(phase, layi, layo, clip1, clip2, Vfreq = 1):
     for p in L:
         me = p.dex; del p.dex
         if pointInBox (p, clip1, clip2):
-            if ssq(*(p.diff(pprev))) > eps:
+            if (p-pprev).mag2() > eps:
                 layo.posts.append(p)
             elif phase==1: pprev.dupl += 1
             transi[me] = len(layo.posts)-1

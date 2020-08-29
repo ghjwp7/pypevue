@@ -429,17 +429,19 @@ module makeCylinders() {\n''')
             exit(0)
         p = ref.levelAt(lev1, pp)
         q = ref.levelAt(lev2, qq)
-        dx, dy, dz = q.diff(p)
-        L = round(max(0.1, sssq(dx,  dy,  dz)), 2)
+        qmp = q.diff(p)
+        L = round(max(0.1, qmp.mag()), 2) # Round L to 2 places
         cName = ref.colorSet[colo]
         alpha = gap/L
-        cc = Point(p.x+alpha*dx, p.y+alpha*dy, p.z+alpha*dz)
+        cc = p + alpha * qmp    # Add scaled qmp to p
         cylNum= 1000*p1 + p2
         if isTrue(listIt):
             print (f'Make {cyl}  L {L:2.2f}  {cName}')
         # Use min/max to avoid exception from dz/L numerical error
-        yAngle = round(degrees(pi/2 - asin(min(1, max(-1, dz/L)))), 2)
-        zAngle = round(degrees(atan2(dy, dx)), 2)
+        ##yAngle = round(degrees(pi/2 - asin(min(1, max(-1, dz/L)))), 2)
+        ##zAngle = round(degrees(atan2(dy, dx)), 2)
+        yAngle = round(degrees(pi/2 - asin(min(1, max(-1, qmp.z/L)))), 2)
+        zAngle = round(degrees(atan2(qmp.y, qmp.x)), 2)
         fout.write(f'''  oneCyl ({cyl.diam:0.3f}, {L-2*gap:0.3f}, [0, {yAngle:0.3f}, {zAngle:0.3f}], [{cc.x:0.3f}, {cc.y:0.3f}, {cc.z:0.3f}], {cName});\n''')
 
     if startFin & 2:
@@ -462,10 +464,10 @@ def autoAdder(fout):    # See if we need to auto-add cylinders
             p = rlo.posts[pn].foot
             for qn in range(1+pn, nPosts):
                 q = rlo.posts[qn].foot
-                dx, dy, dz = p.diff(q)
-                if abs(dx) > cutoff or abs(dy) > cutoff:
+                t = p-q
+                if abs(t.x) > cutoff or abs(t.y) > cutoff:
                     continue
-                d2 = ssq(dx, dy, dz)
+                d2 = t*t        # mag^2 of p-q
                 if d2 > cutoff2: continue
                 if pn not in edgeList or qn not in edgeList[pn]:
                     post1, post2 = str(pn), str(qn)          
@@ -484,7 +486,6 @@ def installParams(script):
     overwritten.  Plugins settings are pre-processed via
     makePluginsList() as well as here. '''
     ref = FunctionList
-    flubs = False
     for parTxt in script:
         plist = parTxt.split()       # Split the list on white space
         for vev in plist:
@@ -501,8 +502,8 @@ def installParams(script):
                         elif t==str:   v = q;          ok=True
                     except:  pass
             if ok: setattr(ref,p,v)
-            else:  flubs = True
-        if flubs: print (f'Parameter-setting fail in "{parTxt}"')
+            else:
+                print (f'Parameter-setting fail in "{parTxt}", value {v} for {p}')
 #-------------------------------------------------------------
 def setClipAndRota(c):
     '''Set empty layout and set defaults for geodesic-dome clipping box

@@ -1,0 +1,26 @@
+
+=P  postLabel=cMu  postAxial=f
+=P  postHi=0.2     postDiam=0.08  autoList=f
+=P  pDiam=0.04     endGap=0       postList=f     cylList=f
+=P  zSpread=t      zSize=8        autoMax=237
+=P  userPar0=400   userPar1=800  
+
+=L
+=   O entry specifies OP origin point; C makes a point 
+O 0 0 0;  C 0,0,0;
+
+= Make 6 polygons, in 6 rings of 5, 10, 15 ... 30 points,
+= centered at various B-specified base points.
+= Rings 1 and 2 have posts 1-5 and 6-15
+= Rings 3,4,5,6 have posts 16-30, 31-50, 51-75, and 76-105
+B 0 0 3.873;  P5, 1.00, 0;
+B 0 0 3.500;  P10,1.94, 0;
+B 0 0 2.905;  P15,2.75, 0;
+B 0 0 2.125;  P20,3.39, 0;
+B 0 0 1.210;  P25,3.81, 0;
+B 0 0 0.219;  P30,3.99, 0;
+  
+=C
+= all the visible edges are automatic in this example.
+= (The 0-0 edge is too short to see; it's here to set color and levels.)
+Bpbb 0 0;
