@@ -123,6 +123,12 @@ class Point:
         '''Scale the x and y components of self, in place.'''
         self.x = s*self.x;  self.y = s*self.y
 
+    # For more information about nutation and precession, see eg
+    # https://demonstrations.wolfram.com/EulerAnglesPrecessionNutationAndSpin/
+    # Generally, if we have an item projecting from the side of a
+    # post, precession is that item's angular position about the axis
+    # of the post when the post is in position, and nutation is the
+    # angle between the post's axis and the item's axis
     def nutation(self, q):
         '''Let s = self; let d = q-s = vector from s to q; and let p = plane
         that's tangent at point s to the sphere of which vector s is a
@@ -386,12 +392,16 @@ class FunctionList:
             finn = [fn for fn in pll.split(',') if fn != '']            
             #print (f'Registrar pll = {pll}, finn = {finn}')
             for toImp in finn:
-                m = importlib.import_module(toImp) # m is a module
-                mkeys = [obj for obj, pred in inspect.getmembers(m)]
+                try:
+                    m = importlib.import_module(toImp) # m is a module
+                    mkeys = [obj for obj, pred in inspect.getmembers(m)]
+                except ModuleNotFoundError:
+                    print (f'**Error** Registrar fail for <{toImp}>')
+                    next
                 # If the module contains a `tell` object, try calling it.
                 if 'tell' in mkeys:
-                    try: 
-                        for f in m.tell(): # Add functions from tell() into ref.fDict{}
+                    try:  # Add functions from tell() into ref.fDict{}
+                        for f in m.tell():
                             name = f.__name__ # Get the function name
                             if name in ref.fNames:
                                 ref.fDict[name] = f

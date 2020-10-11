@@ -121,15 +121,16 @@ it via "baseAddEdge(v,w, layout)" or similar.
 
 **User functions** have names not equal to any base function name; a
 function is a user function if it isn't a base function.  Call user
-functions via U codes in layout sections.  For example, if "U mything
-1,2,4;" appears in a layout section, pypevu will issue `mything(1.0,
-2.0, 4.0)` at that point in its processing.  The function will be
-called with as many numerical parameters as the U code gives it. Note,
-`mything()` should be well-defined.  For example, if mything() code
-(like `def mything(someargs): ...`) is in myPI.py, use `=P
-Plugins=myPI` in your script, and in myPI.py also say `def tell():
-return (mything,)`.  Via proper imports, user functions can access
-pypevu data structures.  For examples see `examples/userfuncs1.py`.
+functions via U codes in layout sections, or as members of ref. in an
+arithmetic section.  For example, if "U mything 1,2,4;" appears in a
+layout section, pypevu will issue `mything(1.0, 2.0, 4.0)` at that
+point in its processing.  The function will be called with as many
+numerical parameters as the U code gives it. Note, `mything()` should
+be well-defined.  For example, if mything() code (like `def
+mything(someargs): ...`) is in myPI.py, use `=P Plugins=myPI` in your
+script, and in myPI.py also say `def tell(): return (mything,)`.  Via
+proper imports, user functions can access pypevu data structures.  For
+examples see `examples/userfuncs1.py`.
 
 [ *In a future release, calls within arithmetic sections of a script
 will be supported in a simpler form, like `ref.mything(paramlist)`,

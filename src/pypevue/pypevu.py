@@ -62,7 +62,6 @@ from sys import argv, exit, exc_info, stderr
 import time, datetime
 from math import sqrt, pi, cos, sin, asin, atan2
 from pypevue import FunctionList, sssq
-    
 #---------------------------------------------------------
 def setupData(c, readArgv = True):
     ref = FunctionList
@@ -88,6 +87,10 @@ def setupData(c, readArgv = True):
     if readArgv:
         for k in range(1,len(argv)):
             c.paramTxt = c.paramTxt + ' ' + argv[k]
+        # Did we have exactly one parameter on the command line?
+        if len(argv)==2 and not ('=' in c.paramTxt): # Is an '=' in it?
+            c.paramTxt = ' f='+argv[1] # No. So prepend 'f='.
+
     c.userLocals = {}               # Initialize empty user-space dict
     exec(f'from pypevue import Point,Post,Layout,FunctionList\nref=FunctionList', c.userLocals)
 #---------------------------------------------------------

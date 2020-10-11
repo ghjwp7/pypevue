@@ -502,8 +502,8 @@ def installParams(script):
                         elif t==str:   v = q;          ok=True
                     except:  pass
             if ok: setattr(ref,p,v)
-            else:
-                print (f'Parameter-setting fail in "{parTxt}", value {v} for {p}')
+            else: 
+                print (f'Parameter-setting fail for "{parTxt}" in {script}')
 #-------------------------------------------------------------
 def setClipAndRota(c):
     '''Set empty layout and set defaults for geodesic-dome clipping box

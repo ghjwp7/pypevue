@@ -36,6 +36,7 @@ class Init_Test(BaseTest):
         self.assertFalse(isTrue('Nu'))
         self.assertFalse(isTrue('non'))        
         print('Tests for true result from isTrue()')
+        self.assertTrue(isTrue(True))
         self.assertTrue(isTrue(' '))
         self.assertTrue(isTrue('hey'))
         self.assertTrue(isTrue('Yep'))
