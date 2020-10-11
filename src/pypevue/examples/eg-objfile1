@@ -1,7 +1,7 @@
 Example: Read a file with a subset of Wavefront .obj codes,
 and draw set of faces.   jiw 9 Oct 2020
 
-=P Plugins=examples.objReader
+=P Plugins=examples.objReader1
 
 ===P userPar2="cottage_obj.obj"
 ===P userPar2="cow-nonormals.obj"
