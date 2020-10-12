@@ -1,0 +1,23 @@
+Example: Read a file with a subset of Wavefront .obj codes,
+and draw sets of faces, several ways.   jiw 11 Oct 2020
+
+Note, when obfile is 'slabs.obj', the resulting OpenSCAD code will
+display ok via F5, but will fail to render via F6 due to CGAL errors
+re improperly-incident faces.  Other non-manifold OBJ files may fail
+for other reasons.
+
+=P Plugins=examples.objReader2
+
+=A obFiles = ('slabs.obj', 'cottage_obj.obj', 'cow-nonormals.obj')
+== Select filename by obFiles subscript.
+=A obfile = obFiles[2]
+
+=A allCalls = ([(ref.objOnePoly, obfile, 1)],   [(ref.objFatPoly, obfile, 2)],   [(ref.objFatPoly, obfile, 3), (ref.objManyPoly, obfile, 2)],   [(ref.objFatPoly, obfile, 3), (ref.objManyPoly, obfile, 2), (ref.objOnePoly, obfile, 1)])
+
+== Select which methods get used, by allCalls subscript:
+==   allCalls[0] for objOnePoly at scale 1
+==   allCalls[1] for objFatPoly at scale 2
+==   allCalls[2] for objFatPoly at scale 3 + objManyPoly at scale 2
+==   allCalls[3] for objFatPoly, objManyPoly, objOnePoly at scales 3, 2, 1
+
+=A ref.objFileCalls=(allCalls[2])

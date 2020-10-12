@@ -11,37 +11,47 @@
 
 # Usage: To incorporate this code into pypevue, in command line
 # parameters or in an `=P` line of a script, say
-# `Plugins=examples.objReader`.  To get data from a .obj file, in a
-# pypevue script say something like `=A ` (fix this)
+# `Plugins=examples.objReader`.
 
-# arithmetic line (an =A line)
- 
-# To tell it which .obj file to read,
-# say `userPar2=f` (replacing f with appropriate .obj file name).  If
-# no .obj file name is specified, name will default to box.obj.
+# See example eg-objfile2b for an example of how to use the methods
+# below.  That example has lines like "=P Plugins=examples.objReader2"
+# and "=A ref.objFileCalls=((ref.objFatPoly, 'slabs.obj', 3),
+# (ref.objManyPoly, 'slabs.obj', 2), (ref.objOnePoly, 'slabs.obj',
+# 1))", with the =P line to incorporate this code into pypevue, and
+# the =A line to tell hookback() which methods to call, with file
+# names and scale factors.  [When an =A line is processed, pypevu's
+# output file is not yet available for the obj*Poly routines to write
+# to; thus the level of indirection.]  When hookback() is called, it
+# will try to call any methods listed in ref.objFileCalls, supplying
+# them with given values for `filename` and `scalefactor` parameters.
+# [You can use hookBack as defined here to call other methods, whether
+# related to OBJ files or not, so long as your methods comply with a
+# parameter set like (fout, scalefactor=1, filename=None).  Or, copy
+# hookBack() into your own code and modify parameter sets and the
+# objFileCalls name and content as you like.]
 
 # Limitation: This code primarily handles v and f lines that appear in
-# .obj files.  These specify vertex and face data.  (See Ref.)  A
-# later version will recognize `usemtl` lines and use them to set
-# colors.  For example, `usemtl green` will change the color of
-# following items to green.  Not all material tags are recognized,
-# which can result in arbitrary color settings.
+# .obj files.  These specify vertex and face data.  (See Ref.)  It
+# recognize `g` group and `usemtl` material lines, saving their values
+# in lists in an ObjFileData.  [Later versions of methods might use
+# those values to set colors, eg, `usemtl green` to change the color
+# of following items to green.  However, not all material tags are
+# colors.]
 
-# Method: This has a method to read data from a specified .obj file.
-# It keeps vertex and face data in an instance of ObjFileData.  Other
-# methods will produce code for various things like one 3D polyhedron
-# per face read in, or treating all the faces as one polyhedron, or
-# generating a thin 3D structure for each face.
+# Method objReadFile reads data from a specified .obj file, storing it
+# in an instance of ObjFileData.  Methods objManyPoly, objOnePoly,
+# objFatPoly produce OpenSCAD code as follows.
 
-# Let F stand for the polygonal shape specified by a certain f line
-# from the file.  F forms one surface of the polyhedron.  An opposite
-# surface is congruent to F, offset by a thickness t.  The direction
-# of offset is (v1 x v2) where v1 and v2 are the first two edges of F.
-# Thickness t is a fraction h of RMS edge length, over all faces in
-# the file.  For example, if there are 28 edges of specified faces and
-# the total of squared lengths is 23548 units, t = sqrt(23548/28)*h =
-# 29*h = 1.45.  The default value of h is 1/20.  Note, shared edges
-# count multiple times.
+# objManyPoly: makes one flat 'polyhedron' for each face read in.
+# objOnePoly:  makes one polyhedron with all faces read in.
+# objFatPoly:  makes 3D structure, of given thickness, per face. (*)
+
+# (*) Let F1 stand for the polygonal shape specified by any given f
+# line from the file.  F1 forms one surface of a polyhedron.  F2, a
+# flat face congruent to F1, is offset from it by a given thickness t.
+# The direction of offset that objFatPoly uses is (v1 x v2) where v1
+# and v2 are the first two edges of F1.  Rectangles of width t close
+# the edges of the space between F1 and F2.
 
 from math import sqrt, pi, cos, sin, asin, atan2, degrees
 from pypevue import ssq, sssq, rotate2, isTrue, Point
@@ -50,95 +60,116 @@ from re import sub
 #---------------------------------------------------------
 class ObjFileData:
     def __init__(self):
-        #print ('ObjFileData - _init__ - in')
         self.fileName = None
-        self.verts = []         # Vertex list
-        self.faces = []         # Face list
-        self.stuff = []         # usemtl data, (uname, v#) pairs
-        self.group = []         # group data,  (gname, v#) pairs
+        self.verts = []         # v Vertex list
+        self.faces = []         # f Face list
+        self.stuff = []         # u usemtl data, (face#, uname) pairs
+        self.group = []         # g group data,  (face#, gname) pairs
         self.linesIn  = 0       # count of lines read from file
         self.nDrops = 0         # count of non-comment dropped lines
         self.drops = ''         # string of dropped lines
-        #print (f'ObjFileData - _init__ - self.drops={self.drops}')
-
 #---------------------------------------------------------
-def objReadFile(fn, scalefac):
+def objReadFile(fn, scalefac, tellCounts=True):
+    '''Read data from file fn, scale it by scale factor, & return an ObjFileData.'''
     #  Strip outer quotes, if any, from the .obj file name
     fn = sub('^"|"$', '', fn)
-    print (f'objReadFile says fn is {fn} and sf is {scalefac}')
+    #print (f'objReadFile says fn is {fn} and sf is {scalefac}')
     result = ObjFileData()
-    #print (f'objReadFile - type(result)={type(result)}   result={result}')
     result.fileName = fn
     with open(fn) as fin:
         lin = 0; skipped = []
         while (token := fin.readline()):
             lin += 1
+            token = sub('/[/0-9]*', '', token)
+            parts = token.split()
             if token.startswith('v '):    # vertex command
-                p = Point(*[float(u) for u in token[2:].split()])
+                p = Point(*[float(u) for u in parts[1:]])
                 p.scale(scalefac)
-                result.verts.append(p)    
+                result.verts.append(p)  
             elif token.startswith('f '):    # face command
-                f = []
-                token = sub('/[/0-9]*', '', token)
-                for u in token[2:].split():
-                    f.append(int(u)-1) # Make list of corners of face
-                result.faces.append(f)
-            
+                f = list(int(u)-1 for u in parts[1:])
+                result.faces.append(f)            
             elif token.startswith('#') or token=='' or token=='\n':
                 pass # ignore comments and empty lines
+            elif token.startswith('usemtl'):
+                result.stuff.append((len(result.faces), parts[1]))
+            elif token.startswith('g'):
+                result.group.append((len(result.faces), parts[1]))
             else:
                 skipped.append(lin) # Add lin to list of dropped lines
     result.linesIn = lin
     result.nDrops  = len(skipped)
-    result.drops   = ' '.join(skipped)
-    print (f"Obtained {len(result.verts)} vertices and {len(result.faces)} faces from {result.linesIn} lines in file {result.fileName}")
-    print (f"Skipped {result.nDrops} lines (#{result.drops[:40]}...) of the {result.linesIn} lines in file")
-
+    result.drops   = ' '.join(str(t) for t in skipped)
+    if tellCounts:
+        print (f"Obtained {len(result.verts)} vertices and {len(result.faces)} faces from {result.linesIn} lines in file {result.fileName}")
+        print (f"Skipped {result.nDrops} lines (#{result.drops[:40]}...) of the {result.linesIn} lines in file")
     return result
-
-def morestuff():    
-    nverts = len(verts)
-    # Scale the vertices and get total of edge lengths
-    for i in range(nverts):
-        verts[i].scale(ref.SF)
-    totalssq = nsides = 0
-    for f in faces:        # f is an index number of a vertex
-        m = f[-1] if f[-1]<nverts else 0
-        for n in f:
-            nsides += 1
-            nl = n if n<nverts else m
-            if 0<=nl<nverts and 0<=m<nverts:
-                totalssq += (verts[nl]-verts[m]).mag2()
-            else: print(f'Bad vertex numbers?  {nl} {m} from {f}')
-            m = nl
-    hfactor = 0.05
-    thik = sqrt(totalssq/nsides)*hfactor
-    print (f'nsides={nsides}   totalssq={totalssq}   hfactor={hfactor}   thik={thik}')
-
-def hookBack(fout):
-    # Write OpenSCAD code for faces
-    for f in faces:
-        v0, v1, v2 = verts[0], verts[1], verts[2]
-        vnorm = (v0-v1) & (v2-v1) # v0-v1 cross v2-v1
-        vnorm.scale(thik/vnorm.mag())
+#---------------------------------------------------------
+def objOnePoly(fout, objData=None, thickness=1, scalefactor=1, filename=None):
+    '''Write OpenSCAD code for one polyhedron, with thin faces for an OBJ file'''
+    if filename:
+        objData = objReadFile(filename, scalefactor)
+    pl = ', '.join(f'[{v}]' for v in objData.verts)
+    tl = ', '.join(str(f) for f in objData.faces)
+    fout.write(f'// objOnePoly (... {filename} ...) produces:\n')
+    fout.write(f'polyhedron(points=[{pl}],\n   faces=[{tl}]);\n\n')
+    return objData
+#---------------------------------------------------------
+def objManyPoly(fout, objData=None, thickness=1, scalefactor=1, filename=None):
+    '''Write OpenSCAD code for many 'polyhedrons', one per thin face'''
+    if filename:
+        objData = objReadFile(filename, scalefactor)
+    fout.write(f'// objManyPoly (... {filename} ...) produces:\n')
+    verts = objData.verts
+    for f in objData.faces:
+        pl = ', '.join(f'[{verts[i]}]' for i in f)
+        tl = ', '.join(str(i) for i in range(len(f)))
+        fout.write(f'polyhedron(points=[\n   {pl}],\n   faces=[[{tl}]]);\n')
+    fout.write(f'\n')
+    return objData
+#---------------------------------------------------------
+def objFatPoly(fout, objData=None, thickness=1, scalefactor=1, filename=None):
+    '''Write OpenSCAD code for individual thick faces for an OBJ file'''
+    if filename:
+        objData = objReadFile(filename, scalefactor)
+    fout.write(f'// objFatPoly (... {filename} ...) produces:\n')
+    verts = objData.verts
+    for f in objData.faces:
+        # Compute normal to face, using its first 3 vertices
+        v0, v1, v2 = verts[f[0]], verts[f[1]], verts[f[2]]
+        vnorm = (v0-v1) & (v2-v1)       # v0-v1 cross v2-v1
+        vmag = vnorm.mag()
+        if vmag < 1e-6:  vmag=1   # Any value>0 works ok in this case
+        vnorm.scale(thickness/vmag)     # scale its thickness
+        fout.write(f'// For face {f},  vnorm = {vnorm}\n')
         pl = ', '.join(f'[{verts[i]}]' for i in f)
         tl = ', '.join(f'[{verts[i]+vnorm}]' for i in f)
-        #fout.write(f'polyhedron(points=[{pl},\n           {tl}],\n')
-        fout.write(f'polyhedron(points=[{pl}],\n')
+        fout.write(f'polyhedron(points=[\n    {pl},\n    {tl}],\n')
         nv = len(f)
         pl = ', '.join(str(i) for i in range(nv))
         tl = ', '.join(str(i) for i in range(nv,2*nv))
-        #fout.write(f'faces=[[{pl}], [{tl}],')
-        #fout.write(f'[0, 1, {nv+1}, {nv}] ] );\n')
-        fout.write(f'faces=[[{pl}]] );\n')
-
-    print (f"Skipped lines {' '.join(str(i) for i in skipped)}... of OBJ file")
-    
+        fout.write(f'faces=[[{pl}], [{tl}]')
+        vp = nv-1          # Set previous vertex for wrap-around
+        for i in range(nv):
+            fout.write(f', [{vp}, {i}, {nv+i}, {nv+vp}]')
+            vp = i
+        fout.write(f']);\n\n')
+    return objData
 #---------------------------------------------------------
-def utry(fn, sf):
-    print (f'utry says fn is {fn} and sf is {sf}')
+def hookBack(fout):
+    '''If objFileCalls is properly defined, call methods with params.'''
+    #print (f'hookBack(fout)')
+    try:
+        for meth,fname,scale in ref.objFileCalls:
+            try:
+                print(f'objFileCalls invokes {meth}({fname})')
+                meth(fout, filename=fname, scalefactor=scale)
+            except:
+                print(f'objFileCalls fails for {meth}({fname})')
+    except:
+        print(f'objFileCalls fails in hookBack')
 #---------------------------------------------------------
-def tell(): return (objReadFile,utry)
+def tell(): return (hookBack, objReadFile, objManyPoly, objOnePoly, objFatPoly)
 #---------------------------------------------------------
 if __name__ == '__main__':
     objReadFile('box.obj', 1)

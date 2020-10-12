@@ -2,8 +2,11 @@ Example: Read a file with a subset of Wavefront .obj codes,
 and draw set of faces.   jiw 9 Oct 2020
 
 =P Plugins=examples.objReader2
-=A ref.utry('box.obj', 12)
-=A res = ref.objReadFile('box.obj', 2.2);
+==A if 
+==A res = ref.objReadFile('box.obj', 2.2);
+=A res = ref.objReadFile('cottage_obj.obj', 2.2);
 =A print (f'type(res)={type(res)}   res={res}')
 =A print (f'#verts={len(res.verts)}   first={res.verts[0]}')
 =A print (f'#faces={len(res.faces)}  []= {res.faces[0]}, {res.faces[1]}, ...')
+=A print (f' usemtl:  {res.stuff}')
+=A print (f' groups:  {res.group}')
