@@ -1,5 +1,11 @@
+An example file to demonstrate automatically making edges (cylinders)
+between posts that are within specified cutoff distance of each other.
+See autoAdder1c.py for a description of the algorithm used, and a
+little more about parameters that control it.  See eg-auto-test-2 and
+pypevu.dox (odt or pdf) for descriptions of other parameters
+below.  jiw 15 Oct 2020
 
-=P  postLabel=cMu  postAxial=f
+=P  postLabel=cMu  postAxial=f    Plugins=examples.autoAdder1c
 =P  postHi=0.2     postDiam=0.08  autoList=f
 =P  pDiam=0.04     endGap=0       postList=f     cylList=f
 =P  zSpread=t      zSize=8        autoMax=237
@@ -12,7 +18,7 @@ O 0 0 0;  C 0,0,0;
 = Make 6 polygons, in 6 rings of 5, 10, 15 ... 30 points,
 = centered at various B-specified base points.
 = Rings 1 and 2 have posts 1-5 and 6-15
-= Rings 3,4,5,6 have posts 16-30, 31-50, 51-75, and 76-105
+= Rings 3,4,5,6 have posts 16-30; 31-50; 51-75; and 76-105.
 B 0 0 3.873;  P5, 1.00, 0;
 B 0 0 3.500;  P10,1.94, 0;
 B 0 0 2.905;  P15,2.75, 0;

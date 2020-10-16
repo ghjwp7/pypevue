@@ -19,8 +19,8 @@ userPar1 = {c.userPar1};
 // We make the hemisphere by removing a sphere's bottom half.
 module makeHemi()
   intersection() {'{'}
-    sphere(r = userPar0);
-    translate([0,0,2*userPar0]) cube(size=4*userPar0, center=true);
+    sphere(d = userPar0);
+    translate([0,0,userPar1/2]) cube(size=userPar1, center=true);
   {'}'}
 
 union() {'{'}

@@ -158,16 +158,16 @@ def objFatPoly(fout, objData=None, thickness=1, scalefactor=1, filename=None):
 #---------------------------------------------------------
 def hookBack(fout):
     '''If objFileCalls is properly defined, call methods with params.'''
-    #print (f'hookBack(fout)')
     try:
         for meth,fname,scale in ref.objFileCalls:
             try:
-                print(f'objFileCalls invokes {meth}({fname})')
+                mname = sub('<function | at .*', '', str(meth))
+                print(f'hookBack invokes {mname}({fname}, {scale})')
                 meth(fout, filename=fname, scalefactor=scale)
             except:
-                print(f'objFileCalls fails for {meth}({fname})')
+                print(f'hookBack fails for {meth}({fname}, {scale})')
     except:
-        print(f'objFileCalls fails in hookBack')
+        print(f'hookBack fails with objFileCalls')
 #---------------------------------------------------------
 def tell(): return (hookBack, objReadFile, objManyPoly, objOnePoly, objFatPoly)
 #---------------------------------------------------------

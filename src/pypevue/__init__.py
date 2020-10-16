@@ -315,14 +315,14 @@ class IcosaGeoPoint(Point):
 #==========3==========Post=============================
 class Post:
     def __init__(self, foot, top=0, diam=0, hite=0, yAngle=0, zAngle=0, num=0, data=0):
-        self.foot = foot
-        self.top  = top
-        self.diam = diam
-        self.hite = hite
-        self.yAngle = yAngle
-        self.zAngle = zAngle
-        self.num  = num
-        self.data = data 
+        self.foot = foot        # xyz location of foot of post
+        self.top  = top         # xyz location of top of post
+        self.diam = diam        # Diameter
+        self.hite = hite        # Height
+        self.yAngle = yAngle    # Post-axis angle, relative to y-axis
+        self.zAngle = zAngle    # Post-axis angle, relative to z-axis
+        self.num  = num         # Index number
+        self.data = data        # any user-data
     def __str__( self):
         return f'Post {self.num} ({self.foot}) ({self.top}) {round(self.yAngle,1)} {round(self.zAngle,1)}  '
     def __repr__(self):  return self.__str__()

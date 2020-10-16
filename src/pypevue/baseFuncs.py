@@ -123,8 +123,8 @@ def generatePosts(code, numberTexts, func):
                 c.post2 = transi[c.post2]
                 cylout.append(c)
         del locy;  ref.LO.cyls = cylout
-        # If we wanted autoAdd to work ok after a D operation, at this
-        # point we would clean up LO.edgeList.  But we don't care...
+        # If we wanted autoAdder to work ok after a D operation, at this
+        # point we would clean up LO.edgeList.  But maybe we don't care...
         return
 
     # This exclude-edge code is not so efficient but is good enough
@@ -447,34 +447,9 @@ module makeCylinders() {\n''')
     if startFin & 2:
         fout.write('}\n')           # close the module
 #-------------------------------------------------------------
-def autoAdder(fout):    # See if we need to auto-add cylinders
-    ref = FunctionList
-    rlo = ref.LO
-    cutoff = ref.autoMax
-    clo = len(rlo.cyls) # Record how many cylinders are already processed
-    nPosts = len(rlo.posts)
-    edgeList = rlo.edgeList
-    # in this version punt color, thix, levels ...
-    colo, thix, lev1, lev2 = 'B', 'p', 'c','c'
-            
-    if cutoff > 0:     # See if any way for any more edges
-        print (f'In auto-add, cutoff distance autoMax is {cutoff:7.3f}')
-        cutoff2 = cutoff*cutoff
-        for pn in range(nPosts):
-            p = rlo.posts[pn].foot
-            for qn in range(1+pn, nPosts):
-                q = rlo.posts[qn].foot
-                t = p-q
-                if abs(t.x) > cutoff or abs(t.y) > cutoff:
-                    continue
-                d2 = t*t        # mag^2 of p-q
-                if d2 > cutoff2: continue
-                if pn not in edgeList or qn not in edgeList[pn]:
-                    post1, post2 = str(pn), str(qn)          
-                    cyl = Cylinder(pn,qn, lev1, lev2, colo, thix, ref.endGap, 0,0)
-                    rlo.cyls.append(cyl)
-                    ref.addEdges(pn, qn, ref.LO)
-        writeCylinders(fout, clo, len(rlo.cyls), ref.autoList, 2)
+def autoAdder(fout):
+    '''Stub for auto-adding cylinders, which happens via a plug-in'''
+    pass
 #-------------------------------------------------------------
 def installParams(script):
     '''Given a script line or lines that are Parameter-setting lines, this
