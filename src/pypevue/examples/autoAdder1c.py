@@ -24,32 +24,31 @@ from pypevue import FunctionList as ref, Cylinder
 #----------------------------------------------------------------
 def autoAdder(fout):    # See if we need to auto-add cylinders
     rlo = ref.LO
-    cutoff = ref.autoMax
-    clo = len(rlo.cyls) # Record how many cylinders are already processed
-    nPosts = len(rlo.posts)
-    edgeList = rlo.edgeList
+    cyls  = rlo.cyls            # List of cylinders
+    posts = rlo.posts           # List of posts
+    edgeList = rlo.edgeList     # List of edges
+    nPosts = len(posts)
+    clo = len(cyls) # Record how many cylinders are already processed
     # in this version punt color, thix, levels ...
     colo, thix, lev1, lev2 = 'B', 'p', 'c','c'
             
+    cutoff = ref.autoMax
     if cutoff > 0:     # See if any way for any more edges
         print (f'In auto-add, cutoff distance autoMax is {cutoff:7.3f}')
         cutoff2 = cutoff*cutoff
         for pn in range(nPosts):
-            p = rlo.posts[pn].foot
+            p = posts[pn].foot
             for qn in range(1+pn, nPosts):
-                q = rlo.posts[qn].foot
+                q = posts[qn].foot
                 t = p-q
                 if abs(t.x) > cutoff or abs(t.y) > cutoff:
                     continue
                 d2 = t*t        # mag^2 of p-q
                 if d2 > cutoff2: continue
                 if pn not in edgeList or qn not in edgeList[pn]:
-                    post1, post2 = str(pn), str(qn)          
-                    cyl = Cylinder(pn,qn, lev1, lev2, colo, thix, ref.endGap, 0,0)
-                    rlo.cyls.append(cyl)
-                    #ref.addEdges(pn, qn, ref.LO)
                     ref.addEdges(pn, qn, rlo)
-        ref.writeCylinders(fout, clo, len(rlo.cyls), ref.autoList, 2)
+                    cyls.append(Cylinder(pn,qn, lev1, lev2, colo, thix, ref.endGap, 0,0))
+        ref.writeCylinders(fout, clo, len(cyls), ref.autoList, 2)
 #----------------------------------------------------------------
 def tell():
     return (autoAdder, )

@@ -13,7 +13,7 @@ below.  jiw 15 Oct 2020
 
 =L
 =   O entry specifies OP origin point; C makes a point 
-O 0 0 0;  C 0,0,0;
+O 0 0 0;  C 0,0,4;
 
 = Make 6 polygons, in 6 rings of 5, 10, 15 ... 30 points,
 = centered at various B-specified base points.
@@ -28,5 +28,5 @@ B 0 0 0.219;  P30,3.99, 0;
   
 =C
 = all the visible edges are automatic in this example.
-= (The 0-0 edge is too short to see; it's here to set color and levels.)
+= (The 0-0 edge, too short to see, is here to set color and levels.)
 Bpbb 0 0;

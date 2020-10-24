@@ -1,0 +1,50 @@
+An example file to demonstrate automatically making edges (cylinders)
+between posts that are within specified cutoff distance of each other.
+
+Note: In this example, generated points superficially resemble a
+geodesic arrangement.  However, the arbitrarily selected radii and z
+values used don't give a real geodesic arrangement.  jiw 15 Feb 2020
+
+In this example, no edges are specified in the =C section, so all
+edges are auto-generated, with lengths up to a cutoff value, autoMax.
+If you specify autoMax=126 (here or on the command line) instead of
+127 you will see ten edges disappear (not be generated) in the outer
+ring of triangles.
+
+The next several ranks of post separations after 127 in this example
+occur just below 131, 139, 140, 142, 153... units of length.  For this
+example, autoMax values slightly below those values give different
+numbers of edges generated than at those values.  For example,
+autoMax=138 makes 205 edges and autoMax=139 makes 210 edges, with both
+cases having obviously invalid triangulations.
+  
+In the parameter section, autoList controls whether automatically-
+generated edges get listed, and autoMax is the maximum length that
+generated edges can have.  (If autoMax is 0 or less, no edges can be
+generated.  Its default value is 0.)  Notes: postAxial=f makes the
+posts point at OP, and postLabel=cMu gives labels that are magenta,
+size u, level c.  To see a list of auto-edges, change autoList=f to
+autoList=t.
+
+=P  Plugins=examples.autoAdder2d
+=P  postLabel=cMu  postAxial=f    autoMax=127
+=P  postHi=0.2     postDiam=0.08  autoList=f
+=P  pDiam=0.04     endGap=0       postList=f     cylList=f
+
+=L   The O entry specifies OP
+O 0 0 -4;
+B 0 0 .7;  C 0,0,0;
+= row 1,            posts 1 - 5
+B 0 0 .5;  P5,1,0;
+= row 2,            posts 6 - 10 & 11 - 15
+B 0 0 .2;  P5,1.8,36;
+B 0 0  0;  P5,2,0;
+= rows 3,4,5 with posts 16-30, 31-50, and 51-75
+B 0 0 -0.3; P15,2.6,24;
+B 0 0 -0.7; P20,3.2,18;
+B 0 0 -1.6; P25,3.5,0;
+
+= all the visible edges are automatic in this example.
+= (The 0-0 edge is too short to see; it's here to set color and levels.)
+=C
+Bpbb 0 0;
