@@ -16,9 +16,16 @@ from pypevue import Point, Cylinder, FunctionList as ref
 class Face:                     # Class for triangular faces
     def __init__(self, p1,p2,p3):
         self.p1, self.p2, self.p3 = p1, p2, p3
+        self.complete = False
     @property    # t.get123 is the point numbers of triangle t
     def get123(self): return self.p1, self.p2, self.p3
     def __str__(t):   return f'({t.p1:3}, {t.p2:3}, {t.p3:3})'
+    def origNum(self, A):
+        p,q,r = self.get123
+        u = A[p].num if type(A[p])==Vert else -1
+        v = A[q].num if type(A[q])==Vert else -1
+        w = A[r].num if type(A[r])==Vert else -1
+        return f'({p:3}, {q:3}, {r:3}) : [{u:3}, {v:3}, {w:3}]'
     @property    # t.canon is a canonical signature for point#s of t
     def canon(self):  return tuple(set(self.get123))
 #==============================================================
@@ -45,21 +52,24 @@ def autoAdder(fout):
     for f in tris:  # f is a Face in Delaunay triangulation (3 post #s)
         pvn = f.p3              # pvn is previous vert number
         for cvn in f.get123:    # cvn is current vert number
-            va, vb = min(pvn,cvn),  max(pvn,cvn)
-            pa, pb = verts[va].num, verts[vb].num
+            pa, pb = verts[pvn].num, verts[cvn].num
+            #print (f'Cyl gen:  test  pvn {pvn}, cvn {cvn} ie pa {pa}, pb {pb}')
+            pa, pb = min(pa,pb),  max(pa,pb)
+            pvn = cvn
             if pa not in edgeList or pb not in edgeList[pa]:
                 ref.addEdges(pa, pb, rlo)
                 cyls.append(Cylinder(pa,pb, lev1, lev2, colo, thix, ref.endGap, 0,0))
     ref.writeCylinders(fout, clo, len(cyls), ref.autoList, 2)
 #==============================================================
 def Triangulate(pxy):
-    #  Accepts a list pxy of Points in array pxy. Note, Triangulate
-    #  mods pxy by sorting it and by adding 3 `super-triangle` points
-    #  at end
+    '''Accepts a list of vertices in array pxy.  Returns a list of
+    triangular faces with vertices going clockwise. '''
+    #  Note, Triangulate mods pxy by sorting it and by adding 3
+    # `super-triangle` points at end
     
-    #  Returns a list tris of triangular Face elements, with vertices
-    #  of each face in `clockwise` order.  CW may be ambiguous for
-    #  folded 3D structures; do your own orientation if it matters.
+    #  Returns a list of triangular Face elements, with vertices going
+    #  `clockwise` which may be ambiguous for folded 3D structures.  Do
+    #  your own orientation if it matters.
     
     # The code in this half-3D routine was adapted from
     # triangulate.py, a 2D 22 Oct 2020 python version by James Waldby
@@ -70,9 +80,6 @@ def Triangulate(pxy):
     pxy.sort(key=lambda p: p.x) # Sort points on ascending x coordinate
     # Allocate memory for the completeness list, flag for each triangle
     nv = len(pxy)
-    trimax = 4 * nv           # Upper bound on resulting triangles count
-    complete = [False]*trimax # No triangle is complete yet
-    tris = [0]*trimax
     #  Find maximum and minimum vertex bounds, for calculation of
     #  bounding triangle (supertriangle)
     xmin, xmax = min(v.x for v in pxy), max(v.x for v in pxy)
@@ -80,7 +87,7 @@ def Triangulate(pxy):
     dx,  dy = xmax - xmin, ymax - ymin
     dmax = dx if dx > dy else dy
     xmid, ymid = (xmax + xmin) / 2.0, (ymax + ymin) / 2.0
-    
+
     print (f'\n xmin:{xmin:0.2f}   xmax:{xmax:0.2f}   ymin:{ymin:0.2f}   ymax:{ymax:0.2f}  \n dx:{dx:0.2f}   dy:{dy:0.2f}   dmax:{dmax:0.2f}   xmid:{xmid:0.2f}   ymid:{ymid:0.2f}\n')
     
     #  Set up the supertriangle, a triangle to encompass all the sample
@@ -90,41 +97,38 @@ def Triangulate(pxy):
     pxy.append(Point(xmid,        ymid + 20 * dmax))
     pxy.append(Point(xmid + 20 * dmax, ymid - dmax))
     print (f'Super-triangle: ({pxy[-3]}), ({pxy[-2]}), ({pxy[-1]})\n')
-    tris[0] = Face(nv, nv+1, nv+2)
-    complete[0] = False
-    ntri = 1
+    tris = [Face(nv, nv+1, nv+2)] # Start tris list with super-triangle
     cache = {}
     #  Add points one by one into tris, the present state of mesh
     for i in range(nv):
         xp, yp = pxy[i].x, pxy[i].y
-        #  Set up edge buffer.  If point (xp,yp) being added is inside
+        #  Set up edge list.  If point (xp,yp) being added is inside
         #  circumcircle of some triangle T, then edges of T get put into
-        #  edge buffer, and T gets removed from tris.
-        j, nedge, edges = 0, 0, []  # edges are in class IEDGE
-        while j < ntri:
-            if complete[j]:
+        #  edge list, and T gets removed from tris.
+        j, edges = 0, []  # edges are in class IEDGE
+        while j < len(tris):
+            if tris[j].complete:
                 j += 1; continue # Skip tests if triangle j already done
             threep = [pxy[p] for p in tris[j].get123]
-            inside, xc, yc, rr = CircumCircle(xp, yp, threep, tris[j].canon, cache)
+            inside, xc, yc, rr = CircumCircle2(xp, yp, threep, tris[j].canon, cache)
             if xc < xp and (xp-xc)*(xp-xc) > rr:
-                complete[j] = True # Due to x-sorting of pxy, j is done
-            if inside:             # Add 3 edges into edge buffer
-                nedge += 3
+                tris[j].complete = True # Due to x-sorting of pxy, j is done
+            if inside:             # Add 3 edges into edge list
                 p1, p2, p3 = tris[j].get123
                 edges.append((p1, p2))
                 edges.append((p2, p3))
                 edges.append((p3, p1))
-                ntri -= 1
-                tris[j] = tris[ntri]
-                complete[j] = complete[ntri]
-                j -= 1
-                if not ntri: break
+                tri = tris.pop()
+                if len(tris) <= j: break
+                tris[j] = tri
+                continue        # don't increase j
             j += 1
 
         # Tag [ie mark out] multiple edges [edges shared by different
         # triangles].  Note: if all triangles are specified
         # anticlockwise then all interior edges are opposite pointing
         # in direction, as tested for first.
+        nedge = len(edges)
         for j in range(nedge-1):
             for k in range(j+1, nedge):
                 # 1-2, 2-1 case ...
@@ -135,27 +139,24 @@ def Triangulate(pxy):
                 if edges[j][0]==edges[k][0] and edges[j][1]==edges[k][1]:
                     edges[j] = edges[k] = (-1,-1) # Remove jth & kth edges
 
-        # Form new triangles for the current point.  Skipping over any
-        # tagged edges.  All edges are arranged in clockwise order.
+        # Form new clockwise triangles for the current point, skipping
+        # tagged edges.
         for j in range(nedge):
             if edges[j][0] < 0 or edges[j][1] < 0:
                 continue
-            if ntri >= trimax: return None # c version returns status 4
-            tris[ntri] = Face(edges[j][0], edges[j][1], i)
-            complete[ntri] = False
-            ntri += 1
+            tris.append(Face(edges[j][0], edges[j][1], i))
 
     # Remove triangles with supertriangle vertices (triangles which
     # have a vertex numbered > nv)
-    i = 0
-    while i < ntri:
-        if tris[i].p1 >= nv or tris[i].p2 >= nv or tris[i].p3 >= nv:
-            ntri -= 1
-            tris[i] = tris[ntri]
-            i -= 1
-        i += 1
- 
-    tris = tris[:ntri]
+    #s='\n'
+    #print (f'post remo  |tris|:{len(tris)}   tris:\n{s.join(t.origNum(pxy) for t in tris)}')
+    o = 0
+    for t in tris:
+        if t.p1 < nv and t.p2 < nv and t.p3 < nv:
+            tris[o] = t
+            o += 1
+    tris = tris[:o]
+    #print (f'post remo  |tris|:{len(tris)}   tris:\n{s.join(t.origNum(pxy) for t in tris)}')
     return tris
 #==============================================================
 def CircumCircle3(p, threep, canon, cache):

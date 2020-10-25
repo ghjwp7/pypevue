@@ -65,7 +65,7 @@ from pypevue import FunctionList, sssq
 #---------------------------------------------------------
 def setupData(c, readArgv = True):
     ref = FunctionList
-    c.levels, c.thixx,  c.digits = 'abcde', 'pqrstuvw', '01234356789+-.'
+    c.levels, c.thixx,  c.digits = 'abcde', 'pqrstuvwxyz', '01234356789+-.'
     c.colorSet = {'G':'"Green"', 'Y':'"Yellow"', 'R':'"Red"', 'B':'"Blue"', 'C':'"Cyan"', 'M':'"Magenta"', 'W':'"White"', 'P':'[.5,0,.5]', 'A':'"Coral"'}
     c.colors = c.colorSet.keys()
 
