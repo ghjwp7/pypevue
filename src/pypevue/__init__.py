@@ -228,9 +228,12 @@ class Point:
 
         dx = 0.1
         if (-dx < self.x < dx) and (-dx < self.y < dx):
-            # we are at the top center, define the plane as the y-axis
-            pltc = Point(0,1,0)
-            tv = Point(1,0,p.z)
+            # we are at the top center, define the plane since we cannot take the tangent to a circle
+            # with 0 radius.  This plane is oriented such that the precession angle of a node at the
+            # top or bottom causes the node to be correctly oriented when the node is shifted toward
+            # the adjacent node
+            pltc = Point(-1,0,0)
+            tv = Point(0,1,p.z)
         else:
             # find the plane which is formed by the line tangent to the circle on
             # the sphere with z = p.z and the origin.
