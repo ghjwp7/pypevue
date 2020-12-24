@@ -329,9 +329,9 @@ def runScript(scripts):
             preCyl.gap = ref.endGap
             ref.scriptCyl (ll, preCyl)
 #===============================================
-def postTop(p, OP):   # Given post location p, return loc. of post top
+def postTop(p, OP):   # Given post p, return loc. of post top
     ref = FunctionList
-    x, y, z = p.foot.x, p.foot.y, p.foot.z
+    x, y, z = p.foot.x, p.foot.y, p.foot.z # Location of post foot
     ox, oy, oz = (x, y, z-99) if ref.postAxial else (OP.x, OP.y, OP.z)
     u = ref.SF*ref.postHi       # Distance from p to post-top
     v = sssq(x-ox, y-oy, z-oz)  # Distance from p to origin point
