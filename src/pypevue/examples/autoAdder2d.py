@@ -6,7 +6,7 @@
 # making edges (cylinders) between posts.
 
 # pypevu has two parameters related to automatic-edge generation:
-# `autoMax`  - Not used here; is used in autoAdder1c
+# `autoMax`  - Used in test of whether to visualize circumcenters
 # `autoList` - Whether to list generated edges.  autoList=t says to
 # list auto-edges; autoList=f says no.
 from math import sqrt
@@ -33,7 +33,7 @@ def autoAdder(fout):
     for f in tris:  # f is a Face in Delaunay triangulation (3 post #s)
         if f.canon in cache:
             ctr, rr = cache[f.canon]
-            if rr>(ref.autoMax**2)/4:
+            if rr>(ref.autoMax**2)/4: # Test whether to visualize circumcenter
                 fout.write(f'  *translate([{ctr}]) sphere(r={sqrt(rr):0.2f}); // {ref.autoMax}\n')
         pvn = f.p3              # pvn is previous vert number
         for cvn in f.get123:    # cvn is current vert number
