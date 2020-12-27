@@ -54,6 +54,7 @@ def autoAdder(fout):
                 DTedgels[p.num] = []
             DTedgels[p.num].append(q.num)
             p = q
+    nDTedges = len(DTedges)
     for k in range(npoints):
         DTedgels[k] = set(DTedgels[k])
     # Make NN data and NN edges list; via list of PNN points in orig order
@@ -66,29 +67,32 @@ def autoAdder(fout):
     for jp, p in enumerate(Nverts):
         for kq in p.nBSF:
             NNedges[canon(jp,kq)] = 1
+    nNNedges = len(NNedges)
     #print(f'DTedges has {len(DTedges)} entries and NNedges has {len(NNedges)} entries, {[decanon(k) for k in sorted(NNedges.keys())]}')
 
     # Find edges that are in NN but not in DT
+    adddels = 0
     for ne in NNedges:
         if not ne in DTedges:
             ea, eb = decanon(ne)
             dab = (Nverts[ea]-Nverts[eb]).mag2()
-            nbrs = DTedgels[ea].intersection(DTedgels[eb])
-            if len(nbrs) == 2:
-                ec, ed = nbrs
+            # Get list of edges that can go to common neighbors
+            l = sorted(DTedgels[ea].intersection(DTedgels[eb]))
+            for ec, ed in [(x,y) for x in l for y in l if x<y]:
                 dcd = (Nverts[ec]-Nverts[ed]).mag2()
-                # To get list of possible changes change 0 to nonzero
-                if 0: print (f'Verts {ea}, {eb} at d^2 = {dab:0.3f}  Common neighbors: {nbrs} at d^2 = {dcd:0.3f}')
-                if dab < dcd: # Install NN link a-b in place of DT link c-d
-                    del DTedges[canon(ec,ed)]
-                    DTedgels[ec].discard(ed)
-                    DTedgels[ed].discard(ec)
-                    DTedges[canon(ea,eb)] = 1
-                    DTedgels[ea].add(eb)
-                    DTedgels[eb].add(ea)
-            elif len(nbrs) > 2:
-                print(f'Not handling Verts {ea}, {eb}:  Too many common neighbors, {nbrs}')
-
+                cdC = canon(ec,ed)
+                # Is NN link a-b longer than DT link c-d, or c-d not present?
+                if dab > dcd or cdC not in DTedges:
+                    continue    # Skip it if so
+                # Install NN link in place of DT link
+                del DTedges[canon(ec,ed)]
+                DTedgels[ec].discard(ed)
+                DTedgels[ed].discard(ec)
+                DTedges[canon(ea,eb)] = 1
+                DTedgels[ea].add(eb)
+                DTedgels[eb].add(ea)
+                adddels += 1
+    print (f"From {nNNedges} NN edges and {nDTedges} DT edges, added {adddels} NN's in place of DT edges, giving {len(DTedges)} edges net")
     # Make cylinders for Delaunay edges (from low post# to high#)
     for e in sorted(DTedges.keys()):
         pa, pb = decanon(e)
