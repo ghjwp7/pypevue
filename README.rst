@@ -68,14 +68,15 @@ then once you've started OpenSCAD as above, it will notice whenever
 pypevu.scad changes, and will re-render the image.
 
 Automatically running pypevu on script file changes
-===================== During file development and testing, it may be
-convenient to automatically run pypevu when your script file changes.
-To do so: Obtain and install the exec-on-change shell script and
-requirements from
-https://github.com/ghjwp7/plastics/blob/master/exec-on-change so a
-command as below will automatically run pypevu upon changes to a file.
-In a further step, when OpenSCAD sees that pypevu.scad has changed, it
-will re-render it.
+=====================
+
+During file development and testing, it may be convenient to
+automatically run pypevu when your script file changes.  To do so:
+Obtain and install the exec-on-change shell script and requirements
+from https://github.com/ghjwp7/plastics/blob/master/exec-on-change so
+a command as below will automatically run pypevu upon changes to a
+file.  In a further step, when OpenSCAD sees that pypevu.scad has
+changed, it will re-render it.
 
      exec-on-change myscriptfile  './pypevu f=myscriptfile' &
 
