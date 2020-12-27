@@ -29,6 +29,12 @@ examples subdirectory, with names that begin with "eg-").
 Software requirements
 =====================
 
+ • pypevue installation (to process scripts)
+ • OpenSCAD (to visualize results)
+ • pypevue/src/pypevue/examples/eg-* (to see or run examples)
+ • pypevue/tests/ (to run unit tests, if desired)
+ • nearby/src/nearby/ (needed for Delaunay-related examples)
+
 To use the program, you need to have python3 installed on your system
 and also should have openscad installed.  Install pypevu using [in
 future] pip3 or [at moment] by copying files pypevu.py, __init__.py,
@@ -36,7 +42,13 @@ baseFuncs.py, makeIcosaGeo.py into a directory called pypevue.  Get a
 script file for the object you wish to make, and say pypevu f=<sf>
 where <sf> is the script file name.  (If pypevu or the pypevue module
 isn't found, run ./new-bin-lib-links in the pypevue directory.) After
-pypevu runs, view the 3D result via a command like openscad pypevu.scad .
+pypevu runs, view the 3D result via a command like openscad
+pypevu.scad .  Note, several example files (like eg-auto-freq-6-2d and
+-3e) depend on nearest-neighbor and Delaunay-triangulation routines
+found in package `nearby` at https://github.com/ghjwp7/nearby
+(clonable from https://github.com/ghjwp7/nearby.git ).  If you are not
+interested in unit tests or triangulations, you need not install tests
+or `nearby`. 
 
 Running the program
 =====================
@@ -81,7 +93,7 @@ changed, it will re-render it.
      exec-on-change myscriptfile  './pypevu f=myscriptfile' &
 
 Other comments (about running the program) appear at the beginning of
-pypevu.py.
+pypevu.py and in a few pypevue/examples/ files.
 
 How to create software plugins
 =====================
