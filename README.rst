@@ -46,13 +46,19 @@ to a file (by default, to pypevu.scad). For example, you might say
 
      ./pypevu.py  f=eg-pentagon-script
 
-which will produce pypevu.scad based on that script, and then you
-might say
+which will produce pypevu.scad based on that script. Note, if pypevu
+has been properly installed you can just say "pypevu
+eg-pentagon-script", for two reasons: 1) when installed, pypevu is a
+link (in a directory on the search path) to pypevu.py, and 2) when
+given a single parameter, pypevu supposes it is a script file name.
+
+Then say
 
      openscad pypevu.scad &
 
 which will cause OpenSCAD to read pypevu.scad and display the created
-figure.
+figure.  Note, parameters can specify SCAD-code output files with
+other names than pypevu.scad.
 
 Automatic updates in OpenSCAD 
 =====================
@@ -61,13 +67,15 @@ If OpenSCAD's `Design -> Automatic Reload and Preview` option is on,
 then once you've started OpenSCAD as above, it will notice whenever
 pypevu.scad changes, and will re-render the image.
 
-Automatically running pypevu on script file changes 
-=====================
-From https://github.com/ghjwp7/plastics/blob/master/exec-on-change
-obtain the exec-on-change shell script (and its requirements).  Then a
-command like that below will automatically run pypevu whenever file
-"myscriptfile" changes.  Then OpenSCAD will see that pypevu.scad
-changed, and will re-render.
+Automatically running pypevu on script file changes
+===================== During file development and testing, it may be
+convenient to automatically run pypevu when your script file changes.
+To do so: Obtain and install the exec-on-change shell script and
+requirements from
+https://github.com/ghjwp7/plastics/blob/master/exec-on-change so a
+command as below will automatically run pypevu upon changes to a file.
+In a further step, when OpenSCAD sees that pypevu.scad has changed, it
+will re-render it.
 
      exec-on-change myscriptfile  './pypevu f=myscriptfile' &
 
