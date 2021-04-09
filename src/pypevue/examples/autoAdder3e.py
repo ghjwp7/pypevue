@@ -19,7 +19,7 @@
 # list auto-edges; autoList=f says no.
 from math import sqrt
 from pypevue import Point, Cylinder, FunctionList as ref
-from nearby.delaunay import Vert, Triangulate
+from nearby.delaunay import Vert, Triangulate, CircumCircle2, CircumCircle3
 from nearby.kNN import PNN, doAMethod
 #==============================================================
 def autoAdder(fout):
@@ -40,6 +40,7 @@ def autoAdder(fout):
     verts  = [Vert(p.foot, pn) for pn, p in enumerate(posts)]
     print (f'verts has {len(verts)} points, ({verts[0]})...({verts[-1]})')
     # Get Delaunay triangulation of verts
+    Vert.CircumCircle = CircumCircle2
     sverts, tris, cache = Triangulate(verts)
     print (f'tris has {len(tris)} faces, ({tris[0]})...({tris[-1]})')
     # Make DT edges dict and edges lists
@@ -56,11 +57,14 @@ def autoAdder(fout):
             p = q
     nDTedges = len(DTedges)
     for k in range(npoints):
-        DTedgels[k] = set(DTedgels[k])
+        if DTedgels[k]:
+            DTedgels[k] = set(DTedgels[k]) 
     # Make NN data and NN edges list; via list of PNN points in orig order
     # PNN.kNN needs to be set before we call doAMethod
     PNN.kNN = 1                           # We want exactly 1 nearest nbr
-    PNN.kNN = 6                           # Actually, we want more than that
+    PNN.kNN = 18                           # Actually, we want more than that
+    # For ./eg-zrough3e.py 5 2 1   0 2    3 && pypevu xyz try different kNN
+    # and see misplaced cylinders or posts ^^^^^^^^^^
     Nverts = [PNN(p.foot.x,p.foot.y,p.foot.z) for p in posts] # PNN has .BSF[] for each point
     doAMethod(Nverts)
     NNedges = {}
@@ -77,7 +81,9 @@ def autoAdder(fout):
             ea, eb = decanon(ne)
             dab = (Nverts[ea]-Nverts[eb]).mag2()
             # Get list of edges that can go to common neighbors
-            l = sorted(DTedgels[ea].intersection(DTedgels[eb]))
+            if type(DTedgels[ea])==set==type(DTedgels[eb]):
+                l = sorted(DTedgels[ea].intersection(DTedgels[eb]))
+            else: continue
             for ec, ed in [(x,y) for x in l for y in l if x<y]:
                 dcd = (Nverts[ec]-Nverts[ed]).mag2()
                 cdC = canon(ec,ed)
@@ -92,7 +98,7 @@ def autoAdder(fout):
                 DTedgels[ea].add(eb)
                 DTedgels[eb].add(ea)
                 adddels += 1
-    print (f"From {nNNedges} NN edges and {nDTedges} DT edges, added {adddels} NN's in place of DT edges, giving {len(DTedges)} edges net")
+    print (f"From {nNNedges} NN edges and {nDTedges} DT edges, got {len(DTedges)} edges net by using {adddels} NN's vs DT edges")
     # Make cylinders for Delaunay edges (from low post# to high#)
     for e in sorted(DTedges.keys()):
         pa, pb = decanon(e)
